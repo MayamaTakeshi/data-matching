@@ -1,0 +1,29 @@
+{
+  "name": "data-matching",
+  "version": "1.0.0",
+  "description": "Matches a data object against a reference value Edit",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "node_modules/jest/bin/jest.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MayamaTakeshi/data-matching.git"
+  },
+  "keywords": [
+    "matching",
+    "pattern",
+    "string-matching",
+    "data",
+    "collection"
+  ],
+  "author": "MayamaTakeshi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MayamaTakeshi/data-matching/issues"
+  },
+  "homepage": "https://github.com/MayamaTakeshi/data-matching#readme",
+  "devDependencies": {
+    "string-matching": "^1.0.0"
+  }
+}
