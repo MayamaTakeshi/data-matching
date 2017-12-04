@@ -25,5 +25,8 @@
   "homepage": "https://github.com/MayamaTakeshi/data-matching#readme",
   "devDependencies": {
     "string-matching": "^1.0.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
   }
 }
