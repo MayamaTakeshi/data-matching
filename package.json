@@ -1,6 +1,6 @@
 {
   "name": "data-matching",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Matches a data object against a reference value Edit",
   "main": "src/index.js",
   "scripts": {
@@ -23,10 +23,8 @@
     "url": "https://github.com/MayamaTakeshi/data-matching/issues"
   },
   "homepage": "https://github.com/MayamaTakeshi/data-matching#readme",
-  "devDependencies": {
-    "string-matching": "^1.0.0"
-  },
   "dependencies": {
+    "string-matching": "^1.0.0",
     "lodash": "^4.17.4"
   }
 }
