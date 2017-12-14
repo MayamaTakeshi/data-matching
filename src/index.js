@@ -36,7 +36,7 @@ var _typeof = (v) => {
 
 var _match_arrays = (expected, received, dict, full_match) => {
 	if(full_match) {
-		if(expected.length != received.length) throw "Array lengths don't match"
+		if(expected.length != received.length) throw new Error("Array lengths don't match")
 	}
 	for(var i=0 ; i<expected.length ; i++) {
 		if(!_match(expected[i], received[i], dict, full_match)) {
@@ -55,20 +55,20 @@ var _match_dicts = (expected, received, dict, full_match) => {
 		var val_e = expected[key]
 		if(val_e == absent) {
 			if(keys_r.has(key)) {
-				throw "Element " + key + " should be absent"
+				throw new Error("Element " + key + " should be absent")
 			} else {
 				console.log("OK: " + key + ' is absent')
 			}
 		} else {
-			if(!keys_r.has(key)) throw "Expected element " + key + " not found"
-			if(!_match(expected[key], received[key], dict, full_match)) throw "No match for element " + key
+			if(!keys_r.has(key)) throw new Error("Expected element " + key + " not found")
+			if(!_match(expected[key], received[key], dict, full_match)) throw new Error("No match for element " + key)
 		}
 
 		keys_r.delete(key)
 	}
 
 	if(full_match) {
-		if(keys_r.length > 0) throw "Dict full match failed"
+		if(keys_r.length > 0) throw new Error("Dict full match failed")
 	}
 	return true
 }
@@ -88,7 +88,7 @@ var _match = (expected, received, dict, full_match) => {
 		} else if(type_e == 'dict') {
 			return _match_dicts(expected, received, dict, full_match)
 		}
-		if(expected != received) throw "Elements expected='" + expected + "' received='" + received + "' don't match"
+		if(expected != received) throw new Error("Elements expected='" + expected + "' received='" + received + "' don't match")
 
 		return true
 	}
@@ -113,7 +113,7 @@ var collect = (var_name) => {
 			dict[var_name] = val
 			return true
 		} else {
-			if(dict[var_name] != val) throw "Cannot set " + var_name + " to " + util.inspect(val) + " because it is already set to " + util.inspect(dict[var_name])
+			if(dict[var_name] != val) throw new Error("Cannot set " + var_name + " to " + util.inspect(val) + " because it is already set to " + util.inspect(dict[var_name]))
 			return true
 		}
 	}
