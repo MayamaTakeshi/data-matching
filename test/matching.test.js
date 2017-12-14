@@ -62,7 +62,7 @@ test('partial_match: absent', () => {
 			AA: 1,
 			BB: 2,
 		},
-		c: ['zero', 1, true],
+		c: ['zero', 1, true, (x) => { return x == 'three' }],
 	}
 	var received = {
 		b: 2,

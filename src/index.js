@@ -35,6 +35,7 @@ var _typeof = (v) => {
 }
 
 var _match_arrays = (expected, received, dict, full_match) => {
+	print_debug("Checking [" + expected + "]")
 	if(full_match) {
 		if(expected.length != received.length) throw new Error("Array lengths don't match")
 	}
@@ -43,7 +44,12 @@ var _match_arrays = (expected, received, dict, full_match) => {
 			return false
 		}	
 	}
+	print_debug("OK")
 	return true;
+}
+
+var print_debug = (s) => {
+		console.error(s) // this actually is not an error. It is just to avoid messing with STDOUT from client code.
 }
 
 var _match_dicts = (expected, received, dict, full_match) => {
@@ -51,17 +57,19 @@ var _match_dicts = (expected, received, dict, full_match) => {
 	var keys_r = new Set(Object.keys(received))
 
 	for(var key of keys_e) {
-		console.log("Checking " + key)
+		print_debug("Checking " + key) 
 		var val_e = expected[key]
 		if(val_e == absent) {
 			if(keys_r.has(key)) {
 				throw new Error("Element " + key + " should be absent")
 			} else {
-				console.log("OK: " + key + ' is absent')
+				print_debug("OK: " + key + ' is absent')
 			}
 		} else {
 			if(!keys_r.has(key)) throw new Error("Expected element " + key + " not found")
-			if(!_match(expected[key], received[key], dict, full_match)) throw new Error("No match for element " + key)
+			if(!_match(expected[key], received[key], dict, full_match)) throw new Error("No match for dict key '" + key + "'")
+
+			print_debug("OK")
 		}
 
 		keys_r.delete(key)
@@ -70,6 +78,7 @@ var _match_dicts = (expected, received, dict, full_match) => {
 	if(full_match) {
 		if(keys_r.length > 0) throw new Error("Dict full match failed")
 	}
+	print_debug("OK")
 	return true
 }
 
@@ -90,6 +99,7 @@ var _match = (expected, received, dict, full_match) => {
 		}
 		if(expected != received) throw new Error("Elements expected='" + expected + "' received='" + received + "' don't match")
 
+		print_debug("OK")
 		return true
 	}
 
