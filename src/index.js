@@ -18,6 +18,12 @@ var _non_blank_str = (x) => {
 	return x != "" 
 }
 
+var _str_equal = (s) => {
+	return (x) => {
+		return x.toString() === s.toString()
+	}
+}
+
 var _typeof = (v) => {
 	var t = typeof v;
 	if(t === 'object') {
@@ -181,4 +187,6 @@ module.exports = {
 	null: _null,
 	non_zero: _non_zero,
 	non_blank_str: _non_blank_str,
+
+	str_equal: _str_equal,
 }

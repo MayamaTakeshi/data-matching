@@ -94,3 +94,19 @@ test('partial_match: not absent', () => {
 	expect( () => m.partial_match(expected)(received, dict) ).toThrow(/should be absent/)
 })
 
+test('str_equal', () => {
+	var expected = {
+		a: m.str_equal(1),
+		b: m.str_equal('2'),
+		c: m.str_equal('3'),
+	}
+	var received = {
+		a: 1,
+		b: 2,
+		c: '3',
+	}
+
+	var dict = {}
+	var res = m.partial_match(expected)(received, dict)
+	expect(res).toEqual(true)
+})
