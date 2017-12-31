@@ -1,5 +1,7 @@
 const m = require('../src/index');
 
+const THROW_MATCHING_ERRORS = true
+
 test('partial_match: arrays matched', () => {
 	var expected = [1,2,3,4,[5,6,7]];
 	var received = [1,2,3,4,[5,6,7]];
@@ -25,7 +27,16 @@ test('full_match: arrays differ in length', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	expect( () => m.full_match(expected)(received, dict) ).toThrow(/Array lengths don't match/)
+	var res = m.full_match(expected, !THROW_MATCHING_ERRORS)(received, dict)
+	expect(res).toEqual(false)
+})
+
+test('full_match: arrays differ in length (throw matching error)', () => {
+	var expected = [1,2,3,4,[5,6,7]];
+	var received = [1,2,3,4,[5,6,7,8]];
+
+	var dict = {}
+	expect( () => m.full_match(expected, THROW_MATCHING_ERRORS)(received, dict) ).toThrow(/Array lengths don't match/)
 })
 
 test("partial_match: no array match", () => {
@@ -33,8 +44,18 @@ test("partial_match: no array match", () => {
 	var received = [1,2,3,4,[5,6,77]];
 
 	var dict = {}
-	expect( () => m.partial_match(expected)(received, dict) ).toThrow(/Elements .+ don't match/)
+	var res = m.partial_match(expected, !THROW_MATCHING_ERRORS)(received, dict)
+	expect(res).toEqual(false)
 })
+
+test("partial_match: no array match (throw matching error)", () => {
+	var expected = [1,2,3,4,[5,6,7]];
+	var received = [1,2,3,4,[5,6,77]];
+
+	var dict = {}
+	expect( () => m.partial_match(expected, THROW_MATCHING_ERRORS)(received, dict) ).toThrow(/Elements .+ don't match/)
+})
+
 
 
 test('partial_match: dicts matched', () => {
@@ -91,8 +112,26 @@ test('partial_match: not absent', () => {
 	}
 
 	var dict = {}
-	expect( () => m.partial_match(expected)(received, dict) ).toThrow(/should be absent/)
+	var res = m.partial_match(expected, !THROW_MATCHING_ERRORS)(received, dict)
+	expect(res).toEqual(false)
 })
+
+test('partial_match: not absent (throw matching error)', () => {
+	var expected = {
+		a: m.absent,
+		b: 2,
+		c: 3,
+	}
+	var received = {
+		a: 1,
+		b: 2,
+		c: 3,
+	}
+
+	var dict = {}
+	expect( () => m.partial_match(expected, THROW_MATCHING_ERRORS)(received, dict) ).toThrow(/should be absent/)
+})
+
 
 test('str_equal', () => {
 	var expected = {

@@ -40,13 +40,19 @@ var _typeof = (v) => {
 	}
 }
 
-var _match_arrays = (expected, received, dict, full_match) => {
+var _match_arrays = (expected, received, dict, full_match, throw_matching_errors) => {
 	print_debug("Checking [" + expected + "]")
 	if(full_match) {
-		if(expected.length != received.length) throw new Error("Array lengths don't match")
+		if(expected.length != received.length) {
+			if(throw_matching_errors) {
+				throw new Error("Array lengths don't match")
+			} else {
+				return false
+			}
+		}
 	}
 	for(var i=0 ; i<expected.length ; i++) {
-		if(!_match(expected[i], received[i], dict, full_match)) {
+		if(!_match(expected[i], received[i], dict, full_match, throw_matching_errors)) {
 			return false
 		}	
 	}
@@ -58,7 +64,7 @@ var print_debug = (s) => {
 		console.error(s) // this actually is not an error. It is just to avoid messing with STDOUT from client code.
 }
 
-var _match_dicts = (expected, received, dict, full_match) => {
+var _match_dicts = (expected, received, dict, full_match, throw_matching_errors) => {
 	var keys_e = new Set(Object.keys(expected))
 	var keys_r = new Set(Object.keys(received))
 
@@ -67,14 +73,29 @@ var _match_dicts = (expected, received, dict, full_match) => {
 		var val_e = expected[key]
 		if(val_e == absent) {
 			if(keys_r.has(key)) {
-				throw new Error("Element " + key + " should be absent")
+				if(throw_matching_errors) {
+					throw new Error("Element " + key + " should be absent")
+				} else {
+					return false
+				}
 			} else {
 				print_debug("OK: " + key + ' is absent')
 			}
 		} else {
-			if(!keys_r.has(key)) throw new Error("Expected element " + key + " not found")
-			if(!_match(expected[key], received[key], dict, full_match)) throw new Error("No match for dict key '" + key + "'")
-
+			if(!keys_r.has(key)) {
+				if(throw_matching_errors) {
+					throw new Error("Expected element " + key + " not found")
+				} else {
+					return false
+				}
+			}
+			if(!_match(expected[key], received[key], dict, full_match, throw_matching_errors)) {
+				if(throw_matching_errors) {
+					throw new Error("No match for dict key '" + key + "'")
+				} else {
+					return false
+				}
+			}
 			print_debug("OK")
 		}
 
@@ -82,13 +103,19 @@ var _match_dicts = (expected, received, dict, full_match) => {
 	}
 
 	if(full_match) {
-		if(keys_r.length > 0) throw new Error("Dict full match failed")
+		if(keys_r.length > 0) {
+			if(throw_matching_errors) {
+				throw new Error("Dict full match failed")
+			} else {
+				return false
+			}
+		}
 	}
 	print_debug("OK")
 	return true
 }
 
-var _match = (expected, received, dict, full_match) => {
+var _match = (expected, received, dict, full_match, throw_matching_errors) => {
 	var type_e = _typeof(expected)
 	var type_r = _typeof(received)
 
@@ -99,11 +126,17 @@ var _match = (expected, received, dict, full_match) => {
 
 	if(type_e == type_r) {
 		if(type_e == 'array') {
-			return _match_arrays(expected, received, dict, full_match)
+			return _match_arrays(expected, received, dict, full_match, throw_matching_errors)
 		} else if(type_e == 'dict') {
-			return _match_dicts(expected, received, dict, full_match)
+			return _match_dicts(expected, received, dict, full_match, throw_matching_errors)
 		}
-		if(expected != received) throw new Error("Elements expected='" + expected + "' received='" + received + "' don't match")
+		if(expected != received) {
+			if(throw_matching_errors) {
+				throw new Error("Elements expected='" + expected + "' received='" + received + "' don't match")
+			} else {
+				return false
+			}
+		}
 
 		print_debug("OK")
 		return true
@@ -146,30 +179,30 @@ var _deepMap = (obj, iterator, context) => {
     });
 }
 
-var _matchify_strings = (evt) => {
+var _matchify_strings = (evt, throw_matching_errors) => {
 	return _deepMap(evt, (x) => {
 		if(typeof x == 'string' && x.match(re_string_matching_indication)) {
-			return sm.gen_matcher(x)
+			return sm.gen_matcher(x, throw_matching_errors)
 		} else {
 			return x
 		}
 	})
 }
 
-var partial_match = (expected) => {
-	var expected2 = _matchify_strings(expected)
+var partial_match = (expected, throw_matching_errors) => {
+	var expected2 = _matchify_strings(expected, throw_matching_errors)
 	var f =  (received, dict) => {
-		return _match(expected2, received, dict, false)
+		return _match(expected2, received, dict, false, throw_matching_errors)
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'partial_match'
 	return f
 }
 
-var full_match = (expected) => {
-	var expected2 = _matchify_strings(expected)
+var full_match = (expected, throw_matching_errors) => {
+	var expected2 = _matchify_strings(expected, throw_matching_errors)
 	var f = (received, dict) => {
-		return _match(expected2, received, dict, true);
+		return _match(expected2, received, dict, true, throw_matching_errors);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'full_match'
