@@ -86,6 +86,7 @@ var _match_dicts = (expected, received, dict, full_match, throw_matching_errors)
 				if(throw_matching_errors) {
 					throw new Error("Expected element " + key + " not found")
 				} else {
+					print_debug("Key '" + key + "' absent")
 					return false
 				}
 			}
@@ -93,20 +94,22 @@ var _match_dicts = (expected, received, dict, full_match, throw_matching_errors)
 				if(throw_matching_errors) {
 					throw new Error("No match for dict key '" + key + "'")
 				} else {
+					print_debug("No match for '" + key + "'")
 					return false
 				}
 			}
-			print_debug("OK")
 		}
 
+		print_debug("Check of '" + key + "' OK")
 		keys_r.delete(key)
 	}
 
 	if(full_match) {
-		if(keys_r.length > 0) {
+		if(keys_r.size > 0) {
 			if(throw_matching_errors) {
 				throw new Error("Dict full match failed")
 			} else {
+				print_debug("full_match failed due extra keys: [" + Array.from(keys_r) + ']')
 				return false
 			}
 		}
@@ -209,6 +212,26 @@ var full_match = (expected, throw_matching_errors) => {
 	return f
 }
 
+var _json = (expected, full_match, throw_matching_errors) => {
+	var expected2 = _matchify_strings(expected, throw_matching_errors)
+	return (s, dict) => {
+		var received = JSON.parse(s);
+		return _match(expected2, received, dict, full_match, throw_matching_errors);
+	}
+}
+
+var _kv_params_string = (expected, param_sep, kv_sep, string_decoder, full_match, throw_matching_errors) => {
+	var expected2 = _matchify_strings(expected, throw_matching_errors)
+	return (s, dict) => {
+		var received = s;
+		if(string_decoder) {
+			received = string_decoder(s);
+		}
+		received = _.chain(received).split(param_sep).map((s) => { return s.split(kv_sep)}).fromPairs().value();
+		return _match(expected2, received, dict, full_match, throw_matching_errors);
+	}
+}
+
 module.exports = {
 	pm: partial_match,
 	fm: full_match,
@@ -220,6 +243,10 @@ module.exports = {
 	null: _null,
 	non_zero: _non_zero,
 	non_blank_str: _non_blank_str,
+
+	json: _json,
+
+	kv_params_string: _kv_params_string,
 
 	str_equal: _str_equal,
 }
