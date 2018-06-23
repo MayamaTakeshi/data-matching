@@ -241,7 +241,15 @@ var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder,
 		received = _
 			.chain(received)
 			.split(param_sep)
-			.map((s) => { return s.split(kv_sep)})
+			.map((s) => {
+				var parts = s.split(kv_sep);
+				var key = parts[0];
+				var val =  parts.slice(1).join(kv_sep)
+				if(postparse_decoder) {
+					val = postparse_decoder(val);
+				}
+				return [key, val];
+			})
 			.fromPairs()
 			.value();
 		return _match(expected2, received, dict, full_match, throw_matching_errors);
