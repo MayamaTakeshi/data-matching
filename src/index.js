@@ -4,23 +4,47 @@ var util = require('util')
 
 const re_string_matching_indication = /(^|[^!])!{/
 
-var _null = (x) => { return !x ? true : false }
-
-var _non_zero = (x) => {
-	if(typeof x != 'number') return false
-
-	return x != 0 
+var _null = (x, dict, throw_matching_errors, path) => {
+	if(x) {
+		if(throw_matching_errors) throw new Error(`${path}: expected to be null`)
+		return false
+	}
+	return true
 }
 
-var _non_blank_str = (x) => {
-	if(typeof x != 'string') return false
+var _non_zero = (x, dict, throw_matching_errors, path) => {
+	if(typeof x != 'number') {
+		if(throw_matching_errors) throw new Error(`${path}: expected to be a number`)
+		return false
+	}
 
-	return x != "" 
+	if(x == 0) {
+		if(throw_matching_errors) throw new Error(`${path}: expected to be non_zero`)
+		return false
+	}
+	return true
+}
+
+var _non_blank_str = (x, dict, throw_matching_errors, path) => {
+	if(typeof x != 'string') {
+		if(throw_matching_errors) throw new Error(`${path}: expected to be a string`)
+		return false
+	}
+
+	if(x == '') {
+		if(throw_matching_errors) throw new Error(`${path}: expected to be non_blank_str`)
+		return false
+	}
+	return true
 }
 
 var _str_equal = (s) => {
-	return (x) => {
-		return x.toString() === s.toString()
+	return (x, dict, throw_matching_errors, path) => {
+		if( x.toString() !== s.toString() ) {
+			if(throw_matching_errors) throw new Error(`${path}: expected to str_equal ${s} but got ${x}`)
+			return false
+		}
+		return true
 	}
 }
 
@@ -40,23 +64,24 @@ var _typeof = (v) => {
 	}
 }
 
-var _match_arrays = (expected, received, dict, full_match, throw_matching_errors) => {
-	print_debug("Checking [" + expected + "]")
+var _match_arrays = (expected, received, dict, full_match, throw_matching_errors, path) => {
+	var err
+	print_debug(`${path}: checking`)
+
 	if(full_match) {
 		if(expected.length != received.length) {
-			if(throw_matching_errors) {
-				throw new Error("Array lengths don't match")
-			} else {
-				return false
-			}
+			err = `${path}: Array lengths don't match`
+			if(throw_matching_errors) throw new Error(err);
+			print_debug(err)
+			return false
 		}
 	}
 	for(var i=0 ; i<expected.length ; i++) {
-		if(!_match(expected[i], received[i], dict, full_match, throw_matching_errors)) {
+		if(!_match(expected[i], received[i], dict, full_match, throw_matching_errors, path + '[' + i + ']')) {
 			return false
 		}	
 	}
-	print_debug("OK")
+	print_debug(`${path}: check OK`)
 	return true;
 }
 
@@ -64,108 +89,113 @@ var print_debug = (s) => {
 		console.error(s) // this actually is not an error. It is just to avoid messing with STDOUT from client code.
 }
 
-var _match_dicts = (expected, received, dict, full_match, throw_matching_errors) => {
+var _match_dicts = (expected, received, dict, full_match, throw_matching_errors, path) => {
+	var err
+	print_debug(`${path}: checking`)
+
 	var keys_e = new Set(Object.keys(expected))
 	var keys_r = new Set(Object.keys(received))
 
 	for(var key of keys_e) {
-		print_debug("Checking " + key) 
+		print_debug(`${path}.${key}: checking`)
 		var val_e = expected[key]
 		if(val_e == absent) {
 			if(keys_r.has(key)) {
-				if(throw_matching_errors) {
-					throw new Error("Element " + key + " should be absent")
-				} else {
-					return false
-				}
+				err = `${path}.${key}: should be absent`
+				if(throw_matching_errors) throw new Error(err)
+				print_debug(err)
+				return false
 			} else {
-				print_debug("OK: " + key + ' is absent')
+				print_debug(`${path}.${key}: absent as expected`)
 			}
 		} else {
 			if(!keys_r.has(key)) {
-				if(throw_matching_errors) {
-					throw new Error("Expected element " + key + " not found")
-				} else {
-					print_debug("Key '" + key + "' absent")
-					return false
-				}
+				err = `${path}.${key}: should be present`
+				if(throw_matching_errors) throw new Error(err)
+				print_debug(err)
+				return false
 			}
-			if(!_match(expected[key], received[key], dict, full_match, throw_matching_errors)) {
-				if(throw_matching_errors) {
-					throw new Error("No match for dict key '" + key + "'")
-				} else {
-					print_debug("No match for '" + key + "'")
-					return false
-				}
+			if(!_match(expected[key], received[key], dict, full_match, throw_matching_errors, path + "." + key)) {
+				err = `${path}.${key}: no match`
+				print_debug(err)
+				return false
 			}
 		}
 
-		print_debug("Check of '" + key + "' OK")
+		print_debug(`${path}.${key}: check OK`)
 		keys_r.delete(key)
 	}
 
 	if(full_match) {
 		if(keys_r.size > 0) {
-			if(throw_matching_errors) {
-				throw new Error("Dict full match failed")
-			} else {
-				print_debug("full_match failed due extra keys: [" + Array.from(keys_r) + ']')
-				return false
-			}
+			err = `${path}: full match failed due extra keys ${Array.from(keys_r)}`
+			if(throw_matching_errors) throw new Error(err)
+			print_debug(err)
+			return false
 		}
 	}
-	print_debug("OK")
+	print_debug(`${path}: check OK`)
 	return true
 }
 
-var _match = (expected, received, dict, full_match, throw_matching_errors) => {
+var _match = (expected, received, dict, full_match, throw_matching_errors, path) => {
+	var err
+
 	var type_e = _typeof(expected)
 	var type_r = _typeof(received)
 
 	if(type_e == 'undefined') {
 		// this means to ignore received value
+		print_debug(`${path}: required to be ignored`)
 		return true
 	}
 
 	if(type_e == type_r) {
 		if(type_e == 'array') {
-			return _match_arrays(expected, received, dict, full_match, throw_matching_errors)
+			return _match_arrays(expected, received, dict, full_match, throw_matching_errors, path)
 		} else if(type_e == 'dict') {
-			return _match_dicts(expected, received, dict, full_match, throw_matching_errors)
+			return _match_dicts(expected, received, dict, full_match, throw_matching_errors, path)
 		}
 		if(expected != received) {
-			if(throw_matching_errors) {
-				throw new Error("Elements expected='" + expected + "' received='" + received + "' don't match")
-			} else {
-				return false
-			}
+			err = `${path}: no match between expected='${expected}' and received='${received}'`
+			if(throw_matching_errors) throw new Error(err)
+			print_debug(err)
+			return false
 		}
 
-		print_debug("OK")
+		print_debug(`${path}: check OK`)
 		return true
 	}
 
 	if(type_e == 'function') {
 		var x
 		try {
-			var x = expected(received, dict)
+			var x = expected(received, dict, throw_matching_errors, path)
+			print_debug(`${path}: check ${x ? 'OK' : 'failed'}`) 
 			return x
 		} catch(e) {
-			console.error(e)
+			print_debug(`${path}: check failed with ${e}`)
 			throw e	
 		}
 	}
 
+	print_debug(`${path}: check failed`)
 	return false
 }
 
 var collect = (var_name) => {
-	return (val, dict) => {
+	return (val, dict, throw_matching_errors, path) => {
 		if(typeof dict[var_name] == 'undefined') {
 			dict[var_name] = val
+			print_debug(`${path}: collect OK`)
 			return true
 		} else {
-			if(dict[var_name] != val) throw new Error("Cannot set " + var_name + " to " + util.inspect(val) + " because it is already set to " + util.inspect(dict[var_name]))
+			if(dict[var_name] != val) {
+				var err = `${path}: cannot set '${var_name}' to '${util.inspect(val)}' because it is already set to ${util.inspect(dict[var_name])}`
+				if(throw_maching_errors) throw new Error(err)
+				print_debug(err)
+				return false
+			}
 			return true
 		}
 	}
@@ -182,58 +212,58 @@ var _deepMap = (obj, iterator, context) => {
     });
 }
 
-var _matchify_strings = (evt, throw_matching_errors) => {
+var _matchify_strings = (evt) => {
 	return _deepMap(evt, (x) => {
 		if(typeof x == 'string' && x.match(re_string_matching_indication)) {
-			return sm.gen_matcher(x, throw_matching_errors)
+			return sm.gen_matcher(x)
 		} else {
 			return x
 		}
 	})
 }
 
-var partial_match = (expected, throw_matching_errors) => {
-	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	var f =  (received, dict) => {
-		return _match(expected2, received, dict, false, throw_matching_errors)
+var partial_match = (expected) => {
+	var expected2 = _matchify_strings(expected)
+	var f =  (received, dict, throw_matching_errors, path) => {
+		return _match(expected2, received, dict, false, throw_matching_errors, path)
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'partial_match'
 	return f
 }
 
-var full_match = (expected, throw_matching_errors) => {
-	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	var f = (received, dict) => {
-		return _match(expected2, received, dict, true, throw_matching_errors);
+var full_match = (expected) => {
+	var expected2 = _matchify_strings(expected)
+	var f = (received, dict, throw_matching_errors, path) => {
+		return _match(expected2, received, dict, true, throw_matching_errors, path);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'full_match'
 	return f
 }
 
-var _json = (expected, full_match, throw_matching_errors) => {
-	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	var f = (s, dict) => {
+var _json = (expected, full_match) => {
+	var expected2 = _matchify_strings(expected)
+	var f = (s, dict, throw_matching_errors, path) => {
 		var received = JSON.parse(s);
-		return _match(expected2, received, dict, full_match, throw_matching_errors);
+		return _match(expected2, received, dict, full_match, throw_matching_errors, path);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'json' + (full_match ? '_full_match' : '_partial_match')
 	return f
 }
 
-var json_partial_match = (expected, throw_matching_errors) => {
-	return _json(expected, false, throw_matching_errors);
+var json_partial_match = (expected) => {
+	return _json(expected, false);
 }
 
-var json_full_match = (expected, throw_matching_errors) => {
-	return _json(expected, true, throw_matching_errors);
+var json_full_match = (expected) => {
+	return _json(expected, true);
 }
 
-var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match, throw_matching_errors) => {
-	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	var f = (s, dict) => {
+var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match) => {
+	var expected2 = _matchify_strings(expected)
+	var f = (s, dict, throw_matching_errors, path) => {
 		var received = s;
 		if(preparse_decoder) {
 			received = preparse_decoder(s);
@@ -252,19 +282,19 @@ var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder,
 			})
 			.fromPairs()
 			.value();
-		return _match(expected2, received, dict, full_match, throw_matching_errors);
+		return _match(expected2, received, dict, full_match, throw_matching_errors, path);
 	}
 	f.__original_data__ = expected
-	f.__name__ = 'kv_params_string' + (full_match ? '_full_match' : '_partial_match')
+	f.__name__ = 'kv_str' + (full_match ? '_full_match' : '_partial_match')
 	return f
 }
 
-var kv_str_partial_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, throw_matching_errors) => {
-	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false, throw_matching_errors);
+var kv_str_partial_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
+	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false);
 }
 
-var kv_str_full_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, throw_matching_errors) => {
-	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true, throw_matching_errors);
+var kv_str_full_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
+	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
 }
 
 module.exports = {
