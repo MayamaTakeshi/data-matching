@@ -214,39 +214,71 @@ var full_match = (expected, throw_matching_errors) => {
 
 var _json = (expected, full_match, throw_matching_errors) => {
 	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	return (s, dict) => {
+	var f = (s, dict) => {
 		var received = JSON.parse(s);
 		return _match(expected2, received, dict, full_match, throw_matching_errors);
 	}
+	f.__original_data__ = expected
+	f.__name__ = 'json' + (full_match ? '_full_match' : '_partial_match')
+	return f
 }
 
-var _kv_params_string = (expected, param_sep, kv_sep, string_decoder, full_match, throw_matching_errors) => {
+var json_partial_match = (expected, throw_matching_errors) => {
+	return _json(expected, false, throw_matching_errors);
+}
+
+var json_full_match = (expected, throw_matching_errors) => {
+	return _json(expected, true, throw_matching_errors);
+}
+
+var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match, throw_matching_errors) => {
 	var expected2 = _matchify_strings(expected, throw_matching_errors)
-	return (s, dict) => {
+	var f = (s, dict) => {
 		var received = s;
-		if(string_decoder) {
-			received = string_decoder(s);
+		if(preparse_decoder) {
+			received = preparse_decoder(s);
 		}
-		received = _.chain(received).split(param_sep).map((s) => { return s.split(kv_sep)}).fromPairs().value();
+		received = _
+			.chain(received)
+			.split(param_sep)
+			.map((s) => { return s.split(kv_sep)})
+			.fromPairs()
+			.value();
 		return _match(expected2, received, dict, full_match, throw_matching_errors);
 	}
+	f.__original_data__ = expected
+	f.__name__ = 'kv_params_string' + (full_match ? '_full_match' : '_partial_match')
+	return f
+}
+
+var kv_str_partial_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, throw_matching_errors) => {
+	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false, throw_matching_errors);
+}
+
+var kv_str_full_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, throw_matching_errors) => {
+	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true, throw_matching_errors);
 }
 
 module.exports = {
 	pm: partial_match,
 	fm: full_match,
+	json: json_partial_match,
+	kv_str: kv_str_partial_match,
 
 	partial_match: partial_match,
 	full_match: full_match,
+
+	json_partial_match: json_partial_match,
+	json_full_match: json_full_match,
+
+	kv_str_partial_match: kv_str_partial_match,
+	kv_str_full_match: kv_str_full_match,
+
 	collect: collect,
 	absent: absent,
 	null: _null,
 	non_zero: _non_zero,
 	non_blank_str: _non_blank_str,
-
-	json: _json,
-
-	kv_params_string: _kv_params_string,
 
 	str_equal: _str_equal,
 }
