@@ -312,11 +312,11 @@ module.exports = {
 	json_full_match: (expected) => { return json(expected, true) },
 
 	kv_str_partial_match: (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
-		return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false);
+		return kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false);
 	},
 
 	kv_str_full_match: (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
-		return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
+		return kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
 	},
 
 	matcher: matcher,
