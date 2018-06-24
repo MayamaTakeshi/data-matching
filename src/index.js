@@ -43,15 +43,16 @@ var is_non_blank_str = (x, dict, throw_matching_error, path) => {
 is_non_blank_str.__name__ = "is_non_blank_str"
 
 var is_str_equal = (s) => {
-	return (x, dict, throw_matching_error, path) => {
+	var f = (x, dict, throw_matching_error, path) => {
 		if( x.toString() !== s.toString() ) {
 			if(throw_matching_error) throw new MatchingError(path, `not str_equal expected='${s}' received='${x}'`)
 			return false
 		}
 		return 'is str_equal'
 	}
+	f.__name__ = `is_str_equal['${s}']`
+	return f
 }
-is_str_equal.__name__ = 'is_str_equal'
 
 var _typeof = (v) => {
 	var t = typeof v;
@@ -194,7 +195,7 @@ var collect = (var_name) => {
 			return true
 		}
 	}
-	f.__name__ = `collect[${var_name}]`
+	f.__name__ = `collect['${var_name}']`
 	return f
 }
 
@@ -281,8 +282,18 @@ var kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, 
 
 var matcher = (name, expected) => {
 	if(! typeof expected == 'function') throw new Error("Must be a function")
-	expected.__name__ = name
-	return expected
+	var f = (received, dict, throw_matching_error, path) => {
+		var res = expected(received)
+		if(res == true) return true
+
+		if(throw_matching_error) {
+			throw new MatchingError(path, res)
+		}
+
+		return false
+	}
+	f.__name__ = name
+	return f
 }
 
 module.exports = {
