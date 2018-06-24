@@ -5,15 +5,16 @@ const MatchingError = sm.MatchingError
 
 const re_string_matching_indication = /(^|[^!])!{/
 
-var _null = (x, dict, throw_matching_error, path) => {
+var is_null = (x, dict, throw_matching_error, path) => {
 	if(x) {
 		if(throw_matching_error) throw new MatchingError(path, "should be null")
 		return false
 	}
 	return "is null"
 }
+is_null.__name__ = "is_null"
 
-var _non_zero = (x, dict, throw_matching_error, path) => {
+var is_non_zero = (x, dict, throw_matching_error, path) => {
 	if(typeof x != 'number') {
 		if(throw_matching_error) throw new MatchingError(path, "expected to be a number")
 		return false
@@ -25,8 +26,9 @@ var _non_zero = (x, dict, throw_matching_error, path) => {
 	}
 	return "is non_zero"
 }
+is_non_zero.__name__ = "is_non_zero"
 
-var _non_blank_str = (x, dict, throw_matching_error, path) => {
+var is_non_blank_str = (x, dict, throw_matching_error, path) => {
 	if(typeof x != 'string') {
 		if(throw_matching_error) throw new MatchingError(path, "expected to be a string")
 		return false
@@ -38,8 +40,9 @@ var _non_blank_str = (x, dict, throw_matching_error, path) => {
 	}
 	return "is non_blank_str"
 }
+is_non_blank_str.__name__ = "is_non_blank_str"
 
-var _str_equal = (s) => {
+var is_str_equal = (s) => {
 	return (x, dict, throw_matching_error, path) => {
 		if( x.toString() !== s.toString() ) {
 			if(throw_matching_error) throw new MatchingError(path, `not str_equal expected='${s}' received='${x}'`)
@@ -48,6 +51,7 @@ var _str_equal = (s) => {
 		return 'is str_equal'
 	}
 }
+is_str_equal.__name__ = 'is_str_equal'
 
 var _typeof = (v) => {
 	var t = typeof v;
@@ -119,7 +123,6 @@ var _match_dicts = (expected, received, dict, full_match, throw_matching_error, 
 				return false
 			}
 		}
-
 		print_debug(`${path}.${key}: matched`)
 		keys_r.delete(key)
 	}
@@ -154,29 +157,20 @@ var _match = (expected, received, dict, full_match, throw_matching_error, path) 
 			return _match_dicts(expected, received, dict, full_match, throw_matching_error, path)
 		}
 		if(expected != received) {
-			reason = `no match: expected='${expected}' received='${received}'`
+			reason = `expected='${expected}' received='${received}'`
 			if(throw_matching_error) throw new MatchingError(path, reason)
 			print_debug(`${path}: ${reason}`)
 			return false
 		}
 
-		print_debug(`${path}: matched`)
+		//print_debug(`${path}: matched`)
 		return "matched"
 	}
 
 	if(type_e == 'function') {
-		/*
-		var x
-		try {
-			var x = expected(received, dict, throw_matching_error, path)
-			print_debug(`${path}: check ${x ? 'OK' : 'failed'}`) 
-			return x
-		} catch(e) {
-			print_debug(`${path}: check failed with ${e}`)
-			throw e	
-		}
-		*/
-		return expected(received, dict, throw_matching_error, path)
+		var res = expected(received, dict, throw_matching_error, path)
+		if(res) print_debug(`${path}: ${res} (matched)`)
+		return res
 	}
 
 	print_debug(`${path}: check failed. (might indicate bug in data-matching: not exhaustive checks)`)
@@ -184,7 +178,7 @@ var _match = (expected, received, dict, full_match, throw_matching_error, path) 
 }
 
 var collect = (var_name) => {
-	return (val, dict, throw_matching_error, path) => {
+	var f = (val, dict, throw_matching_error, path) => {
 		if(typeof dict[var_name] == 'undefined') {
 			dict[var_name] = val
 			print_debug(`${path}: collect OK`)
@@ -200,9 +194,12 @@ var collect = (var_name) => {
 			return true
 		}
 	}
+	f.__name__ = `collect[${var_name}]`
+	return f
 }
 
 const absent = () => { return 'I am the absent function' }
+absent.__name__ = 'absent'
 
 var _deepMap = (obj, iterator, context) => {
     return _.transform(obj, function(result, val, key) {
@@ -243,7 +240,7 @@ var full_match = (expected) => {
 	return f
 }
 
-var _json = (expected, full_match) => {
+var json = (expected, full_match) => {
 	var expected2 = _matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = JSON.parse(s);
@@ -254,15 +251,7 @@ var _json = (expected, full_match) => {
 	return f
 }
 
-var json_partial_match = (expected) => {
-	return _json(expected, false);
-}
-
-var json_full_match = (expected) => {
-	return _json(expected, true);
-}
-
-var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match) => {
+var kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match) => {
 	var expected2 = _matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = s;
@@ -290,36 +279,42 @@ var _kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder,
 	return f
 }
 
-var kv_str_partial_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
-	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false);
-}
-
-var kv_str_full_match = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
-	return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
+var matcher = (name, expected) => {
+	if(! typeof expected == 'function') throw new Error("Must be a function")
+	expected.__name__ = name
+	return expected
 }
 
 module.exports = {
-	pm: partial_match,
-	fm: full_match,
-	json: json_partial_match,
-	kv_str: kv_str_partial_match,
+	absent: absent,
+	is_null: is_null,
+	is_non_zero: is_non_zero,
+	is_non_blank_str: is_non_blank_str,
+	is_str_equal: is_str_equal,
+
+	collect: collect,
 
 	partial_match: partial_match,
 	full_match: full_match,
 
-	json_partial_match: json_partial_match,
-	json_full_match: json_full_match,
+	json_partial_match: (expected) => { return json(expected, false) },
+	json_full_match: (expected) => { return json(expected, true) },
 
-	kv_str_partial_match: kv_str_partial_match,
-	kv_str_full_match: kv_str_full_match,
+	kv_str_partial_match: (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
+		return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, false);
+	},
 
-	collect: collect,
-	absent: absent,
-	null: _null,
-	non_zero: _non_zero,
-	non_blank_str: _non_blank_str,
+	kv_str_full_match: (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
+		return _kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
+	},
 
-	str_equal: _str_equal,
+	matcher: matcher,
+
+	pm: partial_match,
+	fm: full_match,
+	json: json,
+	kv_str: kv_str,
+	m: matcher,
 
 	MatchingError: MatchingError,
 }

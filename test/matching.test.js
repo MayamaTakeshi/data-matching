@@ -72,7 +72,7 @@ test("partial_match: no array match (throw matching error)", () => {
 
 	err = catch_ME( () => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
 
-	expect(err.reason).toEqual("no match: expected='7' received='77'")
+	expect(err.reason).toEqual("expected='7' received='77'")
 	expect(err.path).toEqual("root[4][2]")
 })
 
@@ -156,11 +156,11 @@ test('partial_match: not absent (throw matching error)', () => {
 })
 
 
-test('str_equal', () => {
+test('is_str_equal', () => {
 	var expected = {
-		a: m.str_equal(1),
-		b: m.str_equal('2'),
-		c: m.str_equal('3'),
+		a: m.is_str_equal(1),
+		b: m.is_str_equal('2'),
+		c: m.is_str_equal('3'),
 	}
 	var received = {
 		a: 1,
