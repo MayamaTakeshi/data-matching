@@ -1,6 +1,19 @@
 const m = require('../src/index');
+const MatchingError = m.MatchingError;
 
-const THROW_MATCHING_ERRORS = true
+const THROW_MATCHING_ERROR = true
+
+const catch_ME = (f) => {
+	try {
+		f();
+	} catch (e) {
+		if(! e instanceof MatchingError) {
+			throw "should have thrown MatchingError"
+		}
+		return e
+	}
+	throw "Shold have thrown a MatchingError"
+}
 
 test('partial_match: arrays matched', () => {
 	var expected = [1,2,3,4,[5,6,7]];
@@ -9,7 +22,7 @@ test('partial_match: arrays matched', () => {
 	var dict = {}
 	var res = m.partial_match(expected)(received, dict)
 
-	expect(res).toEqual(true)
+	expect(res).toEqual("array matched")
 })
 
 
@@ -19,7 +32,7 @@ test('partial_match: arrays differ in length', () => {
 
 	var dict = {}
 	var res = m.partial_match(expected)(received, dict)
-	expect(res).toEqual(true)
+	expect(res).toEqual("array matched")
 })
 
 test('full_match: arrays differ in length', () => {
@@ -27,7 +40,7 @@ test('full_match: arrays differ in length', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	var res = m.full_match(expected, !THROW_MATCHING_ERRORS)(received, dict)
+	var res = m.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
@@ -36,7 +49,10 @@ test('full_match: arrays differ in length (throw matching error)', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	expect( () => m.full_match(expected)(received, dict, THROW_MATCHING_ERRORS, "") ).toThrow(/Array lengths don't match/)
+	err = catch_ME(() => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+
+	expect(err.reason).toEqual("arrays lengths do not match: expected_len=3 received_len=4")
+	expect(err.path).toEqual("root[4]")
 })
 
 test("partial_match: no array match", () => {
@@ -44,7 +60,7 @@ test("partial_match: no array match", () => {
 	var received = [1,2,3,4,[5,6,77]];
 
 	var dict = {}
-	var res = m.partial_match(expected, !THROW_MATCHING_ERRORS)(received, dict)
+	var res = m.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
@@ -53,10 +69,12 @@ test("partial_match: no array match (throw matching error)", () => {
 	var received = [1,2,3,4,[5,6,77]];
 
 	var dict = {}
-	expect( () => m.partial_match(expected)(received, dict, THROW_MATCHING_ERRORS, "") ).toThrow(/no match between expected='7' and received='77'/)
+
+	err = catch_ME( () => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+
+	expect(err.reason).toEqual("no match: expected='7' received='77'")
+	expect(err.path).toEqual("root[4][2]")
 })
-
-
 
 test('partial_match: dicts matched', () => {
 	var expected = {
@@ -72,8 +90,9 @@ test('partial_match: dicts matched', () => {
 	}
 	
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict)
-	expect(res).toEqual(true)
+	var res = m.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
+
+	expect(res).toEqual("object matched")
 })
 
 test('partial_match: absent', () => {
@@ -96,7 +115,7 @@ test('partial_match: absent', () => {
 
 	var dict = {}
 	var res = m.partial_match(expected)(received, dict)
-	expect(res).toEqual(true)
+	expect(res).toEqual("object matched")
 })
 
 test('partial_match: not absent', () => {
@@ -112,7 +131,7 @@ test('partial_match: not absent', () => {
 	}
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict, !THROW_MATCHING_ERRORS, "")
+	var res = m.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
@@ -129,7 +148,11 @@ test('partial_match: not absent (throw matching error)', () => {
 	}
 
 	var dict = {}
-	expect( () => m.partial_match(expected)(received, dict, THROW_MATCHING_ERRORS, "") ).toThrow(/should be absent/)
+
+	err = catch_ME(() => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+
+	expect(err.reason).toEqual("should be absent")
+	expect(err.path).toEqual("root.a")
 })
 
 
@@ -146,6 +169,6 @@ test('str_equal', () => {
 	}
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict)
-	expect(res).toEqual(true)
+	var res = m.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
+	expect(res).toEqual("object matched")
 })
