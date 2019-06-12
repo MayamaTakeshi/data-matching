@@ -211,7 +211,7 @@ var _deepMap = (obj, iterator, context) => {
     });
 }
 
-var _matchify_strings = (evt) => {
+var matchify_strings = (evt) => {
 	return _deepMap(evt, (x) => {
 		if(typeof x == 'string' && x.match(re_string_matching_indication)) {
 			return sm.gen_matcher(x)
@@ -222,7 +222,7 @@ var _matchify_strings = (evt) => {
 }
 
 var partial_match = (expected) => {
-	var expected2 = _matchify_strings(expected)
+	var expected2 = matchify_strings(expected)
 	var f =  (received, dict, throw_matching_error, path) => {
 		return _match(expected2, received, dict, false, throw_matching_error, path)
 	}
@@ -232,7 +232,7 @@ var partial_match = (expected) => {
 }
 
 var full_match = (expected) => {
-	var expected2 = _matchify_strings(expected)
+	var expected2 = matchify_strings(expected)
 	var f = (received, dict, throw_matching_error, path) => {
 		return _match(expected2, received, dict, true, throw_matching_error, path);
 	}
@@ -242,7 +242,7 @@ var full_match = (expected) => {
 }
 
 var json = (expected, full_match) => {
-	var expected2 = _matchify_strings(expected)
+	var expected2 = matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = JSON.parse(s);
 		return _match(expected2, received, dict, full_match, throw_matching_error, path);
@@ -253,7 +253,7 @@ var json = (expected, full_match) => {
 }
 
 var kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match) => {
-	var expected2 = _matchify_strings(expected)
+	var expected2 = matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = s;
 		if(preparse_decoder) {
@@ -326,6 +326,9 @@ module.exports = {
 	json: json,
 	kv_str: kv_str,
 	m: matcher,
+
+	matchify_strings: matchify_strings,
+	match: _match,
 
 	MatchingError: MatchingError,
 }
