@@ -1,6 +1,6 @@
 {
   "name": "data-matching",
-  "version": "1.18.3",
+  "version": "1.18.4",
   "description": "Matches a data object against a reference value Edit",
   "main": "src/index.js",
   "scripts": {
@@ -27,6 +27,6 @@
     "braces": "^3.0.2",
     "jest": "^24.8.0",
     "lodash": "^4.17.11",
-    "string-matching": "^1.11.1"
+    "string-matching": "^1.11.2"
   }
 }

@@ -3156,10 +3156,10 @@ string-length@^2.0.0:
     astral-regex "^1.0.0"
     strip-ansi "^4.0.0"
 
-string-matching@^1.11.1:
-  version "1.11.1"
-  resolved "https://registry.yarnpkg.com/string-matching/-/string-matching-1.11.1.tgz#6310b4876e25a9ca25096b9f8f5e6bd2948b48a2"
-  integrity sha512-+YW07M1qWsL1g4w+De/WHfiGsrh6Til91cVHTsQU8thtGNlg450tbrAf+QZjH0C2+GgPLwk27imH7v2CmmkQ8w==
+string-matching@^1.11.2:
+  version "1.11.2"
+  resolved "https://registry.yarnpkg.com/string-matching/-/string-matching-1.11.2.tgz#4cf69b5a533886c91a49690cd0c839f2c035d648"
+  integrity sha512-zfaJBfIVgfCKxuJIrzmys3pyGlTztEi4LUidiIG4CgCc7TFU0tQznYVNzLAnsHeZwMzvTFQlI9OcKe85J98Gtg==
   dependencies:
     merge "^1.2.1"
 
