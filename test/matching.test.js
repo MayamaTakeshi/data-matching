@@ -25,6 +25,25 @@ test('partial_match: arrays matched', () => {
 	expect(res).toEqual("array matched")
 })
 
+test('partial_match: arrays matched (irrelevant elements declared with undefined)', () => {
+	var expected = [undefined,2,undefined,4,[5,undefined,7]];
+	var received = [1,2,3,4,[5,6,7]];
+
+	var dict = {}
+	var res = dm.partial_match(expected)(received, dict)
+
+	expect(res).toEqual("array matched")
+})
+
+test('partial_match: arrays matched (irrelevant elements declared with dm._)', () => {
+	var expected = [dm._,2,dm._,4,[5,dm._,7]];
+	var received = [1,2,3,4,[5,6,7]];
+
+	var dict = {}
+	var res = dm.partial_match(expected)(received, dict)
+
+	expect(res).toEqual("array matched")
+})
 
 test('partial_match: arrays differ in length', () => {
 	var expected = [1,2,3,4,[5,6,7]];
@@ -65,7 +84,7 @@ test('full_match', () => {
 				protocol: 'TCP/MRCPv2',
 				payloads: ["0"],
 				setup: 'active',
-				connection: 'new',
+				connection: dm._,
 				resource: 'speechsynth'
 			},
 			{
@@ -486,6 +505,26 @@ test('unordered_list (array_elements): matcher function and plain array', () => 
 	var matcher = dm.unordered_list([
 		[1, dm.collect('b'), 3],
 		dm.partial_match([10, 20, dm.collect('cc')]),
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			[10, 20, 30],
+			[1, 2, 3],
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list: irrelevant elements declared with undefined', () => {
+	var matcher = dm.unordered_list([
+		[1, dm.collect('b'), undefined],
+		dm.partial_match([undefined, undefined, dm.collect('cc')]),
 	])
 
 	var dict = {}

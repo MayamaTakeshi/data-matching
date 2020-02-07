@@ -402,4 +402,6 @@ module.exports = {
 	match: _match,
 
 	MatchingError: MatchingError,
+
+	_: undefined,
 }
