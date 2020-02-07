@@ -1,15 +1,20 @@
 # data-matching
 Matches a data object against a match object.
 
-# sample usage
+# Syntax details
+  - Part of strings can be collected using '!{name}' syntax (see https://github.com/MayamaTakeshi/string-matching)
+  - data can be collected (stored in a dictionary passed to matching function) by using dm.collect('name')
+  - data that should be absent can be declared with dm.absent
 
-## full match (all specified data must be present):
+# Sample usage
+
+## Full match (all specified data must be present):
 ```
 const dm = require("data-matching")
 const assert = require('assert')
 
 var received = {
-	connection: { ip: '192.168.88.74' },
+	connection: { ip: '192.168.2.10' },
 	media: [
 		{
 			type: 'application',
@@ -30,13 +35,13 @@ var received = {
 }
 
 var expected = {
-	connection: { ip: '192.168.88.74' },
+	connection: { ip: dm.collect('remote_ip') },
 	media: [
 		{
 			type: 'application',
 			port: 9,
-			protocol: 'TCP/MRCPv2',
-			payloads: ["0"],
+			protocol: '!{transport_protocol}/MRCP!{mrcp_version}',
+			payloads: [dm.collect('mrcp_payload')],
 			setup: 'active',
 			connection: 'new',
 			resource: dm.collect('media_resource')
@@ -52,11 +57,15 @@ var expected = {
 
 var store = {}
 assert(dm.full_match(expected)(received, store))
+assert(store.remote_ip == "192.168.2.10")
+assert(store.mrcp_payload == "0")
 assert(store.media_resource == 'speechsynth')
+assert(store.mrcp_version == 'v2')
+assert(store.transport_protocol == 'TCP')
 ```
 
 
-## partial match (only part of the data must match):
+## Partial match (only part of the data must match):
 ```
 const dm = require("data-matching")
 const assert = require('assert')
@@ -87,4 +96,8 @@ assert(store.user2 == 'bob')
 assert(store.domain2 == 'cba.com')
 assert(store.method == 'INVITE')
 ```
+
+## More examples:
+
+See https://github.com/MayamaTakeshi/data-matching/blob/master/test/matching.test.js
 
