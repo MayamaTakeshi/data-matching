@@ -202,6 +202,9 @@ var collect = (var_name) => {
 const absent = () => { return 'I am the absent function' }
 absent.__name__ = 'absent'
 
+const anything = () => { return true }
+anything.__name__ = 'anything'
+
 var _deepMap = (obj, iterator, context) => {
     return _.transform(obj, function(result, val, key) {
 				var type_val = _typeof(val)
@@ -403,5 +406,5 @@ module.exports = {
 
 	MatchingError: MatchingError,
 
-	_: undefined,
+	_: anything,
 }

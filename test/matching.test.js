@@ -25,19 +25,9 @@ test('partial_match: arrays matched', () => {
 	expect(res).toEqual("array matched")
 })
 
-test('partial_match: arrays matched (irrelevant elements declared with undefined)', () => {
-	var expected = [undefined,2,undefined,4,[5,undefined,7]];
-	var received = [1,2,3,4,[5,6,7]];
-
-	var dict = {}
-	var res = dm.partial_match(expected)(received, dict)
-
-	expect(res).toEqual("array matched")
-})
-
-test('partial_match: arrays matched (irrelevant elements declared with dm._)', () => {
-	var expected = [dm._,2,dm._,4,[5,dm._,7]];
-	var received = [1,2,3,4,[5,6,7]];
+test('partial_match: arrays matched (irrelevant elements declared with dm._ (anything))', () => {
+	var expected = [dm._ ,2 , dm._ , 4, [5, dm._, 7]];
+	var received = [1, 2, 3, 4, [5, 6, 7]];
 
 	var dict = {}
 	var res = dm.partial_match(expected)(received, dict)
@@ -148,12 +138,12 @@ test('partial_match: dicts matched', () => {
 	var expected = {
 		a: 1,
 		b: 2,
-		c: ['zero',1,true,undefined],
+		c: ['zero', 1, true, dm._],
 	}
 	var received = {
 		a: 1,
 		b: 2,
-		c: ['zero',1,true,undefined],
+		c: ['zero', 1, true, 4],
 		d: 'something extra',
 	}
 	
@@ -521,10 +511,10 @@ test('unordered_list (array_elements): matcher function and plain array', () => 
 	expect(dict.cc).toBe(30)
 })
 
-test('unordered_list: irrelevant elements declared with undefined', () => {
+test('unordered_list: irrelevant elements declared with dm._ (anything)', () => {
 	var matcher = dm.unordered_list([
-		[1, dm.collect('b'), undefined],
-		dm.partial_match([undefined, undefined, dm.collect('cc')]),
+		[1, dm.collect('b'), dm._],
+		dm.partial_match([dm._, dm._, dm.collect('cc')]),
 	])
 
 	var dict = {}
