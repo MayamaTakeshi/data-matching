@@ -303,7 +303,7 @@ var any_of = (matchers) => {
 		for(var i=0; i<matchers.length ; i++) {
 			var matcher = matchers[i]
 			var dict_clone = _.cloneDeep(dict)
-			res = matcher(received, dict_clone, false, path);
+			res = _match(matcher, received, dict_clone, false, false, path);
 			if(res) {
 				_.assign(dict, dict_clone)
 				return res
@@ -343,7 +343,7 @@ var unordered_list = (expected) => {
 			var received = received_list[i] 
 			for(var j=0 ; j<exp.length ; j++) {
 				var matcher = exp[j]
-				var res = matcher(received, dict, false, path)
+				var res = _match(matcher, received, dict, false, false, path)
 				if(res) {
 					//remove element
 					exp.splice(j, 1);

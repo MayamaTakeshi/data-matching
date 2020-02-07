@@ -401,6 +401,47 @@ test('unordered_list (dict elements): reverse order', () => {
 	expect(dict.cc).toBe(30)
 })
 
+test('unordered_list (dict elements): plain dicts', () => {
+	var matcher = dm.unordered_list([
+		{a: 1, b: dm.collect('b'), c: 3},
+		{aa: 10, bb: 20, cc: dm.collect('cc')},
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			{aa: 10, bb: 20, cc: 30},
+			{a: 1, b: 2, c: 3},
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list (dict elements): matcher function and plain dict', () => {
+	var matcher = dm.unordered_list([
+		dm.partial_match({a: 1, b: dm.collect('b'), c: 3}),
+		{aa: 10, bb: 20, cc: dm.collect('cc')},
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			{aa: 10, bb: 20, cc: 30},
+			{a: 1, b: 2, c: 3},
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+
 test('unordered_list (array elements): normal order', () => {
 	var matcher = dm.unordered_list([
 		dm.full_match([1, dm.collect('b'), 3]),
@@ -421,9 +462,29 @@ test('unordered_list (array elements): normal order', () => {
 	expect(dict.cc).toBe(30)
 })
 
-test('unordered_list (array_elements): reverse order', () => {
+test('unordered_list (array_elements): plain arrays', () => {
 	var matcher = dm.unordered_list([
-		dm.full_match([1, dm.collect('b'), 3]),
+		[1, dm.collect('b'), 3],
+		[10, 20, dm.collect('cc')]
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			[10, 20, 30],
+			[1, 2, 3],
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list (array_elements): matcher function and plain array', () => {
+	var matcher = dm.unordered_list([
+		[1, dm.collect('b'), 3],
 		dm.partial_match([10, 20, dm.collect('cc')]),
 	])
 
