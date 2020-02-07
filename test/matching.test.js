@@ -55,6 +55,55 @@ test('full_match: arrays differ in length (throw matching error)', () => {
 	expect(err.path).toEqual("root[4]")
 })
 
+test('full_match', () => {
+	var expected = {
+		connection: { ip: '192.168.88.74' },
+		media: [
+			{
+				type: 'application',
+				port: 9,
+				protocol: 'TCP/MRCPv2',
+				payloads: ["0"],
+				setup: 'active',
+				connection: 'new',
+				resource: 'speechsynth'
+			},
+			{
+				type: 'audio',
+				port: 14238,
+				protocol: 'RTP/AVP',
+				payloads: ["0", "8", "96"],
+			}
+			]
+	}
+
+	var received = {
+		media: [
+			{
+				type: 'application',
+				port: 9,
+				protocol: 'TCP/MRCPv2',
+				payloads: ["0"],
+				setup: 'active',
+				connection: 'new',
+				resource: 'speechsynth'
+			},
+			{
+				type: 'audio',
+				port: 14238,
+				protocol: 'RTP/AVP',
+				payloads: ["0", "8", "96"],
+			}
+		],
+		connection: { ip: '192.168.88.74' }
+	}
+
+	var dict = {}
+	var res = m.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
+	expect(res).toEqual("object matched")
+})
+
+
 test("partial_match: no array match", () => {
 	var expected = [1,2,3,4,[5,6,7]];
 	var received = [1,2,3,4,[5,6,77]];

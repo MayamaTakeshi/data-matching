@@ -91,7 +91,7 @@ var _match_arrays = (expected, received, dict, full_match, throw_matching_error,
 }
 
 var print_debug = (s) => {
-	console.error(s) // this actually is not an error. It is just to avoid messing with STDOUT from client code.
+	//console.error(s) // this actually is not an error. It is just to avoid messing with STDOUT from client code.
 }
 
 var _match_dicts = (expected, received, dict, full_match, throw_matching_error, path) => {
