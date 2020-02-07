@@ -361,4 +361,83 @@ test('any_of: no taint from previous matcher (array)', () => {
 	expect(dict.cc).toBe(30)
 })
 
+test('unordered_list (dict elements): normal order', () => {
+	var matcher = dm.unordered_list([
+		dm.full_match({a: 1, b: dm.collect('b'), c: 3}),
+		dm.partial_match({aa: 10, bb: 20, cc: dm.collect('cc')}),
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			{a: 1, b: 2, c: 3},
+			{aa: 10, bb: 20, cc: 30},
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list (dict elements): reverse order', () => {
+	var matcher = dm.unordered_list([
+		dm.full_match({a: 1, b: dm.collect('b'), c: 3}),
+		dm.partial_match({aa: 10, bb: 20, cc: dm.collect('cc')}),
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			{aa: 10, bb: 20, cc: 30},
+			{a: 1, b: 2, c: 3},
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list (array elements): normal order', () => {
+	var matcher = dm.unordered_list([
+		dm.full_match([1, dm.collect('b'), 3]),
+		dm.partial_match([10, 20, dm.collect('cc')]),
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			[1, 2, 3],
+			[10, 20, 30],
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
+
+test('unordered_list (array_elements): reverse order', () => {
+	var matcher = dm.unordered_list([
+		dm.full_match([1, dm.collect('b'), 3]),
+		dm.partial_match([10, 20, dm.collect('cc')]),
+	])
+
+	var dict = {}
+	expect(
+		matcher([
+			[10, 20, 30],
+			[1, 2, 3],
+		],
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(2)
+	expect(dict.cc).toBe(30)
+})
 

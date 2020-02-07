@@ -310,13 +310,55 @@ var any_of = (matchers) => {
 			}
 		}
 		if(throw_matching_error) {
-			throw new MatchingError(path, "no match for any_of")
+			throw new MatchingError(path, "any_of no match")
 		}
 		return res
 	}
 	f.__original_data__ = matchers
 	f.__name__ = 'any_of'
 	return f
+}
+
+
+
+var unordered_list = (expected) => {
+	return (received_list, dict, throw_matching_error, path) => {
+		if(_typeof(received_list) != 'array') {
+			if(throw_matching_error) {
+				throw new MatchingError(path, "unordered_list got non list")
+			}
+			return false
+		}
+
+		if(expected.length != received_list.length) {
+			reason = `arrays lengths do not match: expected_len=${expected.length} received_len=${received_list.length}`
+			if(throw_matching_error) throw new MatchingError(path, reason);
+			print_debug(`${path}: ${reason}`)
+			return false
+		}
+
+		var exp = _.cloneDeep(expected)
+
+		for(var i=0 ; i<received_list.length ; i++) {
+			var received = received_list[i] 
+			for(var j=0 ; j<exp.length ; j++) {
+				var matcher = exp[j]
+				var res = matcher(received, dict, false, path)
+				if(res) {
+					//remove element
+					exp.splice(j, 1);
+					break
+				}
+			}
+		}
+		if(exp.length == 0) {
+			return true
+		}
+		if(throw_matching_error) {
+			throw new MatchingError(path, "unordered_list no match")
+		}
+		return false
+	}
 }
 
 
@@ -345,6 +387,8 @@ module.exports = {
 	},
 
 	any_of: any_of,
+
+	unordered_list: unordered_list,
 
 	matcher: matcher,
 
