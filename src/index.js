@@ -296,6 +296,31 @@ var matcher = (name, expected) => {
 	return f
 }
 
+var any_of = (matchers) => {
+	var f = (received, dict, throw_matching_error, path) => {
+		var res
+		//we cannot use matchers.forEach() as a return doesn't interrupt iteration.
+		for(var i=0; i<matchers.length ; i++) {
+			var matcher = matchers[i]
+			var dict_clone = _.cloneDeep(dict)
+			res = matcher(received, dict_clone, false, path);
+			if(res) {
+				_.assign(dict, dict_clone)
+				return res
+			}
+		}
+		if(throw_matching_error) {
+			throw new MatchingError(path, "no match for any_of")
+		}
+		return res
+	}
+	f.__original_data__ = matchers
+	f.__name__ = 'any_of'
+	return f
+}
+
+
+
 module.exports = {
 	absent: absent,
 	is_null: is_null,
@@ -318,6 +343,8 @@ module.exports = {
 	kv_str_full_match: (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder) => {
 		return kv_str(expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, true);
 	},
+
+	any_of: any_of,
 
 	matcher: matcher,
 

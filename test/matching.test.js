@@ -1,5 +1,5 @@
-const m = require('../src/index');
-const MatchingError = m.MatchingError;
+const dm = require('../src/index');
+const MatchingError = dm.MatchingError;
 
 const THROW_MATCHING_ERROR = true
 
@@ -20,7 +20,7 @@ test('partial_match: arrays matched', () => {
 	var received = [1,2,3,4,[5,6,7]];
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict)
+	var res = dm.partial_match(expected)(received, dict)
 
 	expect(res).toEqual("array matched")
 })
@@ -31,7 +31,7 @@ test('partial_match: arrays differ in length', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict)
+	var res = dm.partial_match(expected)(received, dict)
 	expect(res).toEqual("array matched")
 })
 
@@ -40,7 +40,7 @@ test('full_match: arrays differ in length', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	var res = m.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
+	var res = dm.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
@@ -49,7 +49,7 @@ test('full_match: arrays differ in length (throw matching error)', () => {
 	var received = [1,2,3,4,[5,6,7,8]];
 
 	var dict = {}
-	err = catch_ME(() => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+	err = catch_ME(() => dm.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
 
 	expect(err.reason).toEqual("arrays lengths do not match: expected_len=3 received_len=4")
 	expect(err.path).toEqual("root[4]")
@@ -99,7 +99,7 @@ test('full_match', () => {
 	}
 
 	var dict = {}
-	var res = m.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
+	var res = dm.full_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual("object matched")
 })
 
@@ -109,7 +109,7 @@ test("partial_match: no array match", () => {
 	var received = [1,2,3,4,[5,6,77]];
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
+	var res = dm.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
@@ -119,7 +119,7 @@ test("partial_match: no array match (throw matching error)", () => {
 
 	var dict = {}
 
-	err = catch_ME( () => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+	err = catch_ME( () => dm.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
 
 	expect(err.reason).toEqual("expected='7' received='77'")
 	expect(err.path).toEqual("root[4][2]")
@@ -139,14 +139,14 @@ test('partial_match: dicts matched', () => {
 	}
 	
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
+	var res = dm.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
 
 	expect(res).toEqual("object matched")
 })
 
 test('partial_match: absent', () => {
 	var expected = {
-		a: m.absent,
+		a: dm.absent,
 		b: {
 			AA: 1,
 			BB: 2,
@@ -163,13 +163,13 @@ test('partial_match: absent', () => {
 	}
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict)
+	var res = dm.partial_match(expected)(received, dict)
 	expect(res).toEqual("object matched")
 })
 
 test('partial_match: not absent', () => {
 	var expected = {
-		a: m.absent,
+		a: dm.absent,
 		b: 2,
 		c: 3,
 	}
@@ -180,13 +180,13 @@ test('partial_match: not absent', () => {
 	}
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
+	var res = dm.partial_match(expected)(received, dict, !THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual(false)
 })
 
 test('partial_match: not absent (throw matching error)', () => {
 	var expected = {
-		a: m.absent,
+		a: dm.absent,
 		b: 2,
 		c: 3,
 	}
@@ -198,7 +198,7 @@ test('partial_match: not absent (throw matching error)', () => {
 
 	var dict = {}
 
-	err = catch_ME(() => m.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
+	err = catch_ME(() => dm.full_match(expected)(received, dict, THROW_MATCHING_ERROR, "root") )
 
 	expect(err.reason).toEqual("should be absent")
 	expect(err.path).toEqual("root.a")
@@ -207,9 +207,9 @@ test('partial_match: not absent (throw matching error)', () => {
 
 test('is_str_equal', () => {
 	var expected = {
-		a: m.is_str_equal(1),
-		b: m.is_str_equal('2'),
-		c: m.is_str_equal('3'),
+		a: dm.is_str_equal(1),
+		b: dm.is_str_equal('2'),
+		c: dm.is_str_equal('3'),
 	}
 	var received = {
 		a: 1,
@@ -218,6 +218,148 @@ test('is_str_equal', () => {
 	}
 
 	var dict = {}
-	var res = m.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
+	var res = dm.partial_match(expected)(received, dict, THROW_MATCHING_ERROR, "root")
 	expect(res).toEqual("object matched")
 })
+
+test('any_of: first matcher', () => {
+	var matcher = dm.any_of([
+		dm.full_match({
+			a: 1,
+			b: 2,
+			c: dm.collect('c'),
+		}),
+		dm.partial_match({
+			aa: 10,
+			bb: 20,
+			cc: dm.collect('cc'),
+		}),
+	])
+
+	var dict = {}
+	expect(
+		matcher({
+			a: 1,
+			b: 2,
+			c: 3,
+		},
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.c).toBe(3)
+})
+
+test('any_of: second matcher', () => {
+	var matcher = dm.any_of([
+		dm.full_match({
+			a: 1,
+			b: 2,
+			c: dm.collect('c'),
+		}),
+		dm.partial_match({
+			aa: 10,
+			bb: 20,
+			cc: dm.collect('cc'),
+		}),
+	])
+
+	var dict = {}
+	expect(
+		matcher({
+			aa: 10,
+			bb: 20,
+			cc: 30,
+		},
+		dict,
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.cc).toBe(30)
+})
+
+test('any_of: no match', () => {
+	var matcher = dm.any_of([
+		dm.full_match({
+			a: 1,
+			b: 2,
+			c: dm.collect('c'),
+		}),
+		dm.partial_match({
+			aa: 10,
+			bb: 20,
+			cc: dm.collect('cc'),
+		}),
+	])
+
+	var dict = {}
+
+	dict = {}
+	expect(
+		matcher({
+			aaa: 100,
+			bbb: 200,
+			ccc: 300,
+		},
+		dict,
+		!THROW_MATCHING_ERROR,
+		"root")
+	).toBeFalsy()
+})
+
+test('any_of: no taint from previous matcher (dict)', () => {
+	var matcher = dm.any_of([
+		dm.full_match({
+			a: 1,
+			b: dm.collect('b'),
+			c: 3,
+		}),
+		dm.partial_match({
+			aa: 10,
+			bb: 20,
+			cc: dm.collect('cc'),
+		}),
+	])
+
+
+	dict = {}
+	expect(
+		matcher({
+			a: 1,
+			b: 2,
+			c: 300000, // will cause match failure for the first matcher
+			aa: 10,
+			bb: 20,
+			cc: 30,
+		},
+		dict,
+		!THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.a).toBe(undefined)
+	expect(dict.b).toBe(undefined)
+	expect(dict.c).toBe(undefined)
+	expect(dict.aa).toBe(undefined)
+	expect(dict.bb).toBe(undefined)
+	expect(dict.cc).toBe(30)
+})
+
+test('any_of: no taint from previous matcher (array)', () => {
+	var matcher = dm.any_of([
+		dm.full_match([1, dm.collect('b'), 3]),
+		dm.partial_match([1, 2, dm.collect('cc')]),
+	])
+
+
+	dict = {}
+	expect(
+		matcher([1, 2, 30],
+		dict,
+		!THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(undefined)
+	expect(dict.cc).toBe(30)
+})
+
+
