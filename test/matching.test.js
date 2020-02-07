@@ -294,7 +294,6 @@ test('any_of: no match', () => {
 
 	var dict = {}
 
-	dict = {}
 	expect(
 		matcher({
 			aaa: 100,
@@ -322,7 +321,7 @@ test('any_of: no taint from previous matcher (dict)', () => {
 	])
 
 
-	dict = {}
+	var dict = {}
 	expect(
 		matcher({
 			a: 1,
@@ -351,7 +350,7 @@ test('any_of: no taint from previous matcher (array)', () => {
 	])
 
 
-	dict = {}
+	var dict = {}
 	expect(
 		matcher([1, 2, 30],
 		dict,
