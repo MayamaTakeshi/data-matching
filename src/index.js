@@ -299,7 +299,7 @@ var matcher = (name, expected) => {
 	return f
 }
 
-var any_of = (matchers) => {
+var any_of = (matchers, name) => {
 	var f = (received, dict, throw_matching_error, path) => {
 		var res
 		//we cannot use matchers.forEach() as a return doesn't interrupt iteration.
@@ -309,6 +309,9 @@ var any_of = (matchers) => {
 			res = _match(matcher, received, dict_clone, false, false, path);
 			if(res) {
 				_.assign(dict, dict_clone)
+				if(name) {
+					dict[name] = received
+				}
 				return res
 			}
 		}

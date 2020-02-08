@@ -44,7 +44,7 @@ var expected = {
 			payloads: [dm.collect('mrcp_payload')],
 			setup: 'active',
 			connection: 'new',
-			resource: dm.collect('media_resource')
+			resource: dm.any_of(['speechsynth', 'speechrecog'], 'media_resource')
 		},
 		{
 			type: 'audio',

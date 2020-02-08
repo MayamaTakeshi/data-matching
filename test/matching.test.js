@@ -287,6 +287,29 @@ test('any_of: second matcher', () => {
 	expect(dict.cc).toBe(30)
 })
 
+test('any_of: collect matches', () => {
+	var matcher = dm.full_match({
+		type: dm.collect('type'),
+		connection: dm.any_of(['new', 'existing'], 'connection'),
+		resource: dm.any_of(['speechsynch', 'speechrecog'], 'resource'),
+	})
+
+	var dict = {}
+	expect(
+		matcher({
+			type: 'application',
+			connection: 'new',
+			resource: 'speechrecog',
+		},
+		dict,	
+		THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.type).toBe('application')
+	expect(dict.connection).toBe('new')
+	expect(dict.resource).toBe('speechrecog')
+})
+
 test('any_of: no match', () => {
 	var matcher = dm.any_of([
 		dm.full_match({
