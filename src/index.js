@@ -158,6 +158,7 @@ var _match = (expected, received, dict, full_match, throw_matching_error, path) 
 			return _match_dicts(expected, received, dict, full_match, throw_matching_error, path)
 		}
 		if(expected != received) {
+			console.log("throw_matching_error:", throw_matching_error)
 			reason = `expected='${expected}' received='${received}'`
 			if(throw_matching_error) throw new MatchingError(path, reason)
 			print_debug(`${path}: ${reason}`)
@@ -174,8 +175,12 @@ var _match = (expected, received, dict, full_match, throw_matching_error, path) 
 		return res
 	}
 
-	print_debug(`${path}: check failed. (might indicate bug in data-matching: not exhaustive checks)`)
-	return false
+	if(expected === received) {
+		return true
+	} else {
+		var reason = `expected (${JSON.stringify(expected)}) and received (${JSON.stringify(received)}) differ`
+		if(throw_matching_error) throw new MatchingError(path, reason)
+	}
 }
 
 var collect = (var_name) => {
