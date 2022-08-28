@@ -183,8 +183,14 @@ var _match = (expected, received, dict, full_match, throw_matching_error, path) 
 	}
 }
 
-var collect = (var_name) => {
+var collect = (var_name, matcher) => {
 	var f = (val, dict, throw_matching_error, path) => {
+        if(matcher) {
+            if(!_match(matcher, val, dict, false, throw_matching_error, path)) {
+			    return
+            }
+        }
+
 		if(typeof dict[var_name] == 'undefined') {
 			dict[var_name] = val
 			print_debug(`${path}: collect OK`)

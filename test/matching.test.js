@@ -554,3 +554,27 @@ test('unordered_list: irrelevant elements declared with dm._ (anything)', () => 
 	expect(dict.cc).toBe(30)
 })
 
+test('collect with matcher)', () => {
+	var matcher = dm.collect('main', [
+		[10, dm.collect('b'), dm._],
+		dm.partial_match([dm._, dm._, dm.collect('cc')]),
+	])
+
+    var received = [
+        [10, 20, 30],
+        [1, 2, 3],
+    ]
+
+	var dict = {}
+	expect(
+		matcher(
+        received,
+		dict,
+		!THROW_MATCHING_ERROR,
+		"root")
+	).toBeTruthy()
+	expect(dict.b).toBe(20)
+	expect(dict.cc).toBe(3)
+	expect(dict.main).toBe(received)
+})
+
