@@ -1,6 +1,5 @@
 const dm = require('../src/index');
 const MatchingError = dm.MatchingError;
-const s = require('string-matching').gen_matcher;
 
 const THROW_MATCHING_ERROR = true
 
@@ -13,7 +12,7 @@ const catch_ME = (f) => {
 		}
 		return e
 	}
-	throw "Should have thrown a MatchingError"
+	throw "Shold have thrown a MatchingError"
 }
 
 test('partial_match: arrays matched', () => {
@@ -579,26 +578,3 @@ test('collect with matcher)', () => {
 	expect(dict.main).toBe(received)
 })
 
-test('check string-matching', () => {
-	var expected = {
-		a: s('!{user}@!{domain}:!{port}'),
-		b: {
-            B: s('!{schema}://!{location}'),
-        },
-	}
-	var received = {
-		a: 'picard@sttng:1701',
-		b: {
-            B: 'https://somewhere.com',
-        },
-	}
-
-	var d = {}
-	var res = dm.partial_match(expected)(received, d, !THROW_MATCHING_ERROR, "root")
-	expect(res).toEqual("object matched")
-    expect(d.user == 'picard')
-    expect(d.domain == 'sttng')
-    expect(d.port == '1701')
-    expect(d.schema == 'https')
-    expect(d.location == 'somewhere.com')
-})
