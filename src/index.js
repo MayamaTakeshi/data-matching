@@ -225,20 +225,9 @@ var _deepMap = (obj, iterator, context) => {
     });
 }
 
-var matchify_strings = (evt) => {
-	return _deepMap(evt, (x) => {
-		if(typeof x == 'string' && x.match(re_string_matching_indication)) {
-			return sm.gen_matcher(x)
-		} else {
-			return x
-		}
-	})
-}
-
 var partial_match = (expected) => {
-	var expected2 = matchify_strings(expected)
 	var f =  (received, dict, throw_matching_error, path) => {
-		return _match(expected2, received, dict, false, throw_matching_error, path)
+		return _match(expected, received, dict, false, throw_matching_error, path)
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'partial_match'
@@ -246,9 +235,8 @@ var partial_match = (expected) => {
 }
 
 var full_match = (expected) => {
-	var expected2 = matchify_strings(expected)
 	var f = (received, dict, throw_matching_error, path) => {
-		return _match(expected2, received, dict, true, throw_matching_error, path);
+		return _match(expected, received, dict, true, throw_matching_error, path);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'full_match'
@@ -256,10 +244,9 @@ var full_match = (expected) => {
 }
 
 var json = (expected, full_match) => {
-	var expected2 = matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = JSON.parse(s);
-		return _match(expected2, received, dict, full_match, throw_matching_error, path);
+		return _match(expected, received, dict, full_match, throw_matching_error, path);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'json' + (full_match ? '_full_match' : '_partial_match')
@@ -267,7 +254,6 @@ var json = (expected, full_match) => {
 }
 
 var kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, full_match) => {
-	var expected2 = matchify_strings(expected)
 	var f = (s, dict, throw_matching_error, path) => {
 		var received = s;
 		if(preparse_decoder) {
@@ -287,7 +273,7 @@ var kv_str = (expected, param_sep, kv_sep, preparse_decoder, postparse_decoder, 
 			})
 			.fromPairs()
 			.value();
-		return _match(expected2, received, dict, full_match, throw_matching_error, path);
+		return _match(expected, received, dict, full_match, throw_matching_error, path);
 	}
 	f.__original_data__ = expected
 	f.__name__ = 'kv_str' + (full_match ? '_full_match' : '_partial_match')
@@ -415,7 +401,6 @@ module.exports = {
 	kv_str: kv_str,
 	m: matcher,
 
-	matchify_strings: matchify_strings,
 	match: _match,
 
 	MatchingError: MatchingError,

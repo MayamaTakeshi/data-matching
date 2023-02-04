@@ -2,9 +2,9 @@
 Matches a data object against a match object.
 
 # Syntax details
-  - Part of strings can be collected using '!{name}' syntax (see https://github.com/MayamaTakeshi/string-matching)
   - data can be collected (stored in a dictionary passed to matching function) by using dm.collect('name')
   - data that should be absent can be declared with dm.absent
+  - you can do string matching and substring capture by using gen_matcher from [string-matching](https://www.npmjs.com/package/string-matching)
 
 # Sample usage
 
@@ -12,6 +12,7 @@ Matches a data object against a match object.
 ```
 const dm = require("data-matching")
 const assert = require('assert')
+const s = require('string-matching').gen_matcher;
 
 var received = {
 	connection: { ip: '192.168.2.10' },
@@ -40,7 +41,7 @@ var expected = {
 		{
 			type: 'application',
 			port: 9,
-			protocol: '!{transport_protocol}/MRCP!{mrcp_version}',
+			protocol: s('!{transport_protocol}/MRCP!{mrcp_version}'),
 			payloads: [dm.collect('mrcp_payload')],
 			setup: 'active',
 			connection: 'new',
@@ -69,6 +70,7 @@ assert(store.transport_protocol == 'TCP')
 ```
 const dm = require("data-matching")
 const assert = require('assert')
+const s = require('string-matching').gen_matcher;
 
 
 var received = {
@@ -81,9 +83,9 @@ var received = {
 
 
 var expected = {
-	request_uri: 'sip:!{user1}@!{domain1}',
-	from_uri: '<sip:!{user2}@!{domain2}>',
-	cseq: '!{method} 50',
+	request_uri: s('sip:!{user1}@!{domain1}'),
+	from_uri: s('<sip:!{user2}@!{domain2}>'),
+	cseq: s('!{method} 50'),
 	some_absent_key: dm.absent,
 }
 
