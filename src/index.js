@@ -379,6 +379,32 @@ var unordered_list = (expected) => {
 }
 
 
+var gen_gen_matcher = (parser, extractor, name) => {
+    return (expected) => {
+        var expected2 = matchify_strings(expected)
+        var f = (s, dict, throw_matching_error, path) => {
+            console.log("s:", s)
+            var received = parser(s)
+            console.log("received:", received)
+            return _.every(expected2, (val, key) => {
+                console.log("key:", key)
+                var item = extractor(received, key)
+                if(val == absent && item) {
+                    if(throw_matching_error) {
+                        throw Error(`key ${path}.${key} expected to be absent`)
+                    }
+                    return false
+                }
+                var full_match = false
+                return _match(val, item, dict, full_match , throw_matching_error, `${path}.${key}`)
+            })
+        }
+        f.__original_data__ = expected
+        f.__name__ = name
+        return f
+    }
+}
+
 
 module.exports = {
 	absent: absent,
@@ -421,4 +447,6 @@ module.exports = {
 	MatchingError: MatchingError,
 
 	_: anything,
+
+    gen_gen_matcher: gen_gen_matcher,
 }
