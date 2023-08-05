@@ -578,3 +578,31 @@ test('collect with matcher)', () => {
 	expect(dict.main).toBe(received)
 })
 
+test('pop_match with array', () => {
+    const item1 = {
+        id: 1,
+        name: 'user1',
+    }
+    
+    const item2 = {
+        id: 2,
+        name: 'user2',
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.pop_match([
+        {
+            name: 'user2',
+    }],  items, dict)
+
+    expect(item).toEqual(item2)
+
+    expect(items).toEqual([item1])
+})
+
