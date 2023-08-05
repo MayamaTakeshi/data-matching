@@ -578,7 +578,7 @@ test('collect with matcher)', () => {
 	expect(dict.main).toBe(received)
 })
 
-test('pop_match with array', () => {
+test('pop_match with object', () => {
     const item1 = {
         id: 1,
         name: 'user1',
@@ -596,12 +596,10 @@ test('pop_match with array', () => {
 
     const dict = {}
 
-    const item = dm.pop_match([
-        {
-            name: 'user2',
-            id: dm.collect('id')
-        }
-    ],  items, dict)
+    const item = dm.pop_match( {
+        name: 'user2',
+        id: dm.collect('id')
+    },  items, dict)
 
     expect(item).toEqual(item2)
 
@@ -610,7 +608,7 @@ test('pop_match with array', () => {
     expect(items).toEqual([item1])
 })
 
-test('pop_match with string collection', () => {
+test('pop_match with object and string collection', () => {
     const item1 = {
         id: 1,
         name: 'user1',
@@ -628,11 +626,9 @@ test('pop_match with string collection', () => {
 
     const dict = {}
 
-    const item = dm.pop_match([
-        {
-            name: 'user!{id}',
-        }
-    ],  items, dict)
+    const item = dm.pop_match({
+        name: 'user!{id}',
+    },  items, dict)
 
     expect(item).toEqual(item1)
 

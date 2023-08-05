@@ -405,37 +405,29 @@ var gen_gen_matcher = (parser, extractor, name) => {
     }
 }
 
-const pop_match = (function_or_array, array, dict) => {
+const pop_match = (expected, array, dict) => {
     const throw_matching_error = false
     const path = ""
     const full_match = false
 
-    var expected_array = null
-    if(Array.isArray(function_or_array)) {
-        expected_array = matchify_strings(function_or_array)
+    var expected2 = expected
+    if(typeof expected2 != 'function') {
+        expected2 = matchify_strings(expected2)
     }
 
     var index = undefined
     for(var i=0 ; i<array.length ; i++) {
-        const item = array[i]
-        if(typeof function_or_array == 'function') {
-            if(function_or_array(item, dict, throw_matching_error, path)) {
+        var item = array[i]
+        if(typeof expected2 == 'function') {
+            if(expected2(item, dict, throw_matching_error, path)) {
                 index = i
                 break
             }
-        } else if(Array.isArray(function_or_array)) {
-            for(var j=0 ; j<expected_array.length ; j++) {
-                const expected_item = expected_array[j]
-                if(_match(expected_item, item, dict, full_match , throw_matching_error, '')) {
-                    index = i
-                    break
-                }
-            }
-            if(index >= 0) {
+        } else {
+            if(_match(expected2, item, dict, full_match , throw_matching_error, '')) {
+                index = i
                 break
             }
-        } else {
-            throw("pop_match requires function or array as first argument")  
         }
     }
 
@@ -444,7 +436,6 @@ const pop_match = (function_or_array, array, dict) => {
     }
     return undefined
 }
-
 
 module.exports = {
     absent: absent,
