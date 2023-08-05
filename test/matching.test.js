@@ -599,7 +599,69 @@ test('pop_match with array', () => {
     const item = dm.pop_match([
         {
             name: 'user2',
-    }],  items, dict)
+            id: dm.collect('id')
+        }
+    ],  items, dict)
+
+    expect(item).toEqual(item2)
+
+    expect(dict.id).toEqual(2)
+
+    expect(items).toEqual([item1])
+})
+
+test('pop_match with string collection', () => {
+    const item1 = {
+        id: 1,
+        name: 'user1',
+    }
+    
+    const item2 = {
+        id: 2,
+        name: 'user2',
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.pop_match([
+        {
+            name: 'user!{id}',
+        }
+    ],  items, dict)
+
+    expect(item).toEqual(item1)
+
+    expect(dict.id).toEqual('1')
+
+    expect(items).toEqual([item2])
+})
+
+test('pop_match with function', () => {
+    const item1 = {
+        id: 1,
+        name: 'user1',
+    }
+    
+    const item2 = {
+        id: 2,
+        name: 'user2',
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.pop_match((received, dict) => {
+        if(received.name == 'user2') return true
+    }, items, dict)
 
     expect(item).toEqual(item2)
 

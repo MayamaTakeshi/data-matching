@@ -410,23 +410,39 @@ const pop_match = (function_or_array, array, dict) => {
     const path = ""
     const full_match = false
 
+    var expected_array = null
+    if(Array.isArray(function_or_array)) {
+        expected_array = matchify_strings(function_or_array)
+    }
+
+    var index = undefined
     for(var i=0 ; i<array.length ; i++) {
         const item = array[i]
         if(typeof function_or_array == 'function') {
             if(function_or_array(item, dict, throw_matching_error, path)) {
-                return array.splice(i, 1)[0]
+                index = i
+                break
             }
         } else if(Array.isArray(function_or_array)) {
-            for(var j=0 ; j<function_or_array.length ; j++) {
-                const expected = function_or_array[j]
-                if(_match(expected, item, dict, full_match , throw_matching_error, '')) {
-                    return array.splice(i, 1)[0]
+            for(var j=0 ; j<expected_array.length ; j++) {
+                const expected_item = expected_array[j]
+                if(_match(expected_item, item, dict, full_match , throw_matching_error, '')) {
+                    index = i
+                    break
                 }
+            }
+            if(index >= 0) {
+                break
             }
         } else {
             throw("pop_match requires function or array as first argument")  
         }
     }
+
+    if(index >= 0) {
+        return array.splice(index, 1)[0] 
+    }
+    return undefined
 }
 
 
