@@ -583,7 +583,7 @@ test('pop_match with object', () => {
         id: 1,
         name: 'user1',
     }
-    
+
     const item2 = {
         id: 2,
         name: 'user2',
@@ -613,7 +613,7 @@ test('pop_match with object and string collection', () => {
         id: 1,
         name: 'user1',
     }
-    
+
     const item2 = {
         id: 2,
         name: 'user2',
@@ -642,7 +642,7 @@ test('pop_match with function', () => {
         id: 1,
         name: 'user1',
     }
-    
+
     const item2 = {
         id: 2,
         name: 'user2',
@@ -663,4 +663,90 @@ test('pop_match with function', () => {
 
     expect(items).toEqual([item1])
 })
+
+test('reverse_pop_match with object', () => {
+    const item1 = {
+        id: 1,
+        name: 'user1',
+    }
+
+    const item2 = {
+        id: 2,
+        name: 'user2',
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.reverse_pop_match( {
+        name: 'user2',
+        id: 2,
+    },  items, dict)
+
+    expect(item).toEqual(item2)
+
+    expect(items).toEqual([item1])
+})
+
+test('reverse_pop_match with object and string collection', () => {
+    const item1 = {
+        id: 1,
+        name: 'user!{id}',
+    }
+
+    const item2 = {
+        id: 2,
+        name: 'user!{id}',
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.reverse_pop_match( {
+        name: 'user2',
+        id: 2,
+    },  items, dict)
+
+    expect(item).toEqual(item2)
+
+    expect(dict.id).toEqual('2')
+
+    expect(items).toEqual([item1])
+})
+
+test('reverse_pop_match with function', () => {
+    const item1 = {
+        id: 1,
+        name: 'user1',
+    }
+
+    const item2 = (received, dict) => {
+        if(received.name == 'user2') return true
+    }
+
+    const items = [
+        item1,
+        item2,
+    ]
+
+    const dict = {}
+
+    const item = dm.reverse_pop_match({
+        id: 2,
+        name: 'user2'
+    }, items, dict)
+
+    expect(item).toEqual(item2)
+
+    expect(items).toEqual([item1])
+})
+
 

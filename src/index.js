@@ -226,6 +226,9 @@ var _deepMap = (obj, iterator, context) => {
 }
 
 var matchify_strings = (evt) => {
+    if(typeof evt == 'function') {
+        return evt
+    }
     return _deepMap(evt, (x) => {
         if(typeof x == 'string' && x.match(re_string_matching_indication)) {
             return sm.gen_matcher(x)
@@ -410,10 +413,7 @@ const pop_match = (expected, array, dict) => {
     const path = ""
     const full_match = false
 
-    var expected2 = expected
-    if(typeof expected2 != 'function') {
-        expected2 = matchify_strings(expected2)
-    }
+    var expected2 = matchify_strings(expected)
 
     var index = undefined
     for(var i=0 ; i<array.length ; i++) {
@@ -432,10 +432,40 @@ const pop_match = (expected, array, dict) => {
     }
 
     if(index >= 0) {
-        return array.splice(index, 1)[0] 
+        return array.splice(index, 1)[0]
     }
     return undefined
 }
+
+const reverse_pop_match = (item, array, dict) => {
+    const throw_matching_error = false
+    const path = ""
+    const full_match = false
+
+    var array2 = matchify_strings(array)
+
+    var index = undefined
+    for(var i=0 ; i<array2.length ; i++) {
+        var expected = array2[i]
+        if(typeof expected == 'function') {
+            if(expected(item, dict, throw_matching_error, path)) {
+                index = i
+                break
+            }
+        } else {
+            if(_match(expected, item, dict, full_match , throw_matching_error, '')) {
+                index = i
+                break
+            }
+        }
+    }
+
+    if(index >= 0) {
+        return array.splice(index, 1)[0]
+    }
+    return undefined
+}
+
 
 module.exports = {
     absent: absent,
@@ -482,4 +512,6 @@ module.exports = {
     gen_gen_matcher,
 
     pop_match,
+
+    reverse_pop_match,
 }

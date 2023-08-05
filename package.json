@@ -1,6 +1,6 @@
 {
   "name": "data-matching",
-  "version": "1.30.0",
+  "version": "1.31.0",
   "description": "Matches a data object against a reference value Edit",
   "main": "src/index.js",
   "scripts": {
