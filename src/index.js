@@ -85,7 +85,7 @@ var _match_arrays = (expected, received, dict, full_match, throw_matching_error,
     for(var i=0 ; i<expected.length ; i++) {
         if(!_match(expected[i], received[i], dict, full_match, throw_matching_error, path + '[' + i + ']')) {
             return false
-        }    
+        }
     }
     return "array matched"
 }
@@ -114,13 +114,14 @@ var _match_dicts = (expected, received, dict, full_match, throw_matching_error, 
                 print_debug(`${path}.${key}: absent as expected`)
             }
         } else {
-            if(!keys_r.has(key)) {
+            var rec = received[key]
+            if(rec === undefined) {
                 reason = "should be present"
                 if(throw_matching_error) throw new MatchingError(`${path}.${key}`, reason)
                 print_debug(`${path}.${key}: ${reason}`)
                 return false
             }
-            if(!_match(expected[key], received[key], dict, full_match, throw_matching_error, path + "." + key)) {
+            if(!_match(expected[key], rec, dict, full_match, throw_matching_error, path + "." + key)) {
                 return false
             }
         }
@@ -360,7 +361,7 @@ var unordered_list = (expected) => {
         var exp = _.cloneDeep(expected)
 
         for(var i=0 ; i<received_list.length ; i++) {
-            var received = received_list[i] 
+            var received = received_list[i]
             for(var j=0 ; j<exp.length ; j++) {
                 var matcher = exp[j]
                 var res = _match(matcher, received, dict, false, false, path)
