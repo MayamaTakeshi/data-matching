@@ -1,37 +1,43 @@
-const dm = require('../src/index')
-const assert = require('assert')
+const dm = require("../src/index");
+const assert = require("assert");
 
-test('jsxpath', () => {
-    const xml2json = require('xml2json')
-    const JSXPath = require('jsxpath')
+test("jsxpath", () => {
+    const xml2json = require("xml2json");
+    const JSXPath = require("jsxpath");
 
     var xml = `
 <books>
     <book title="Harry Potter" id="1111" code="abc"/>
     <book title="Catch-22" id="2222" code="def"/>
     <book title="The Road" id="3333" code="foo@bar"/>
-</books>`
+</books>`;
 
-    var parser = (s) => { return JSON.parse(xml2json.toJson(s)) }
+    var parser = (s) => {
+        return JSON.parse(xml2json.toJson(s));
+    };
     var extractor = (data, key) => {
-        let jsxpath = new JSXPath(data)
-        return jsxpath.process({path: key})
-    }
+        let jsxpath = new JSXPath(data);
+        return jsxpath.process({ path: key });
+    };
 
-    var gen_matcher = dm.gen_gen_matcher(parser, extractor, 'jsxpath')
+    var gen_matcher = dm.gen_gen_matcher(parser, extractor, "jsxpath");
 
     var matcher = gen_matcher({
-        '/books/book[title = "Harry Potter"]': [[{id: "1111", code: dm.collect('code1')}]],
-        '/books/book[id = "2222"]': [[{title: "Catch-22", code: dm.collect('code2')}]],
-        '/books/book[id = "3333"]': [[{code: 'foo@!{ending}'}]],
-    })
+        '/books/book[title = "Harry Potter"]': [
+            [{ id: "1111", code: dm.collect("code1") }],
+        ],
+        '/books/book[id = "2222"]': [
+            [{ title: "Catch-22", code: dm.collect("code2") }],
+        ],
+        '/books/book[id = "3333"]': [[{ code: "foo@!{ending}" }]],
+    });
 
-	var dict = {}
-    assert(matcher(xml, dict))
-    assert(dict.code1 == "abc")
-    assert(dict.code2 == "def")
-    assert(dict.ending == "bar")
-})
+    var dict = {};
+    assert(matcher(xml, dict));
+    assert(dict.code1 == "abc");
+    assert(dict.code2 == "def");
+    assert(dict.ending == "bar");
+});
 
 /*
 test('jaycue', () => {
@@ -131,4 +137,3 @@ test('xpath', () => {
     assert(dict.ending == "bar")
 })
 */
-
