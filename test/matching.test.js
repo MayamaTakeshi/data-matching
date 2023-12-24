@@ -123,7 +123,7 @@ test("partial_match: arrays differ in length", () => {
 
     var dict = {};
     var res = dm.partial_match(expected)(received, dict);
-    expect(res).toEqual("array matched");
+    expect(res).toEqual(false);
 });
 
 test("full_match: arrays differ in length", () => {

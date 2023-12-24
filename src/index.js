@@ -76,13 +76,11 @@ var _match_arrays = (
     var reason;
     print_debug(`${path}: checking`);
 
-    if (full_match) {
-        if (expected.length != received.length) {
-            reason = `arrays lengths do not match: expected_len=${expected.length} received_len=${received.length}`;
-            if (throw_matching_error) throw new MatchingError(path, reason);
-            print_debug(`${path}: ${reason}`);
-            return false;
-        }
+    if (expected.length != received.length) {
+        reason = `arrays lengths do not match: expected_len=${expected.length} received_len=${received.length}`;
+        if (throw_matching_error) throw new MatchingError(path, reason);
+        print_debug(`${path}: ${reason}`);
+        return false;
     }
     for (var i = 0; i < expected.length; i++) {
         if (
