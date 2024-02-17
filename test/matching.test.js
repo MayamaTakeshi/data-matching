@@ -893,3 +893,27 @@ test("reverse_pop_match with function", () => {
 
     expect(items).toEqual([item1]);
 });
+
+test("push)", () => {
+    var expected = {
+        id: dm.push('ids'),
+    };
+    var received = {
+        name: 'john',
+        id: 10,
+    };
+
+    var dict = {};
+    var res = dm.partial_match(expected)(
+        received,
+        dict,
+        !THROW_MATCHING_ERROR,
+        "root",
+    );
+
+    expect(res).toEqual("object matched");
+
+    expect(dict).toEqual({ids: [10]});
+});
+
+
