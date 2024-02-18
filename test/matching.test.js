@@ -914,6 +914,22 @@ test("push)", () => {
     expect(res).toEqual("object matched");
 
     expect(dict).toEqual({ids: [10]});
+
+    var received2 = {
+        name: 'bob',
+        id: 20,
+    };
+
+    res = dm.partial_match(expected)(
+        received2,
+        dict,
+        !THROW_MATCHING_ERROR,
+        "root",
+    );
+
+    expect(res).toEqual("object matched");
+
+    expect(dict).toEqual({ids: [10, 20]});
 });
 
 

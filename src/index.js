@@ -282,7 +282,7 @@ var push = (var_name, matcher) => {
         if (typeof dict[var_name] == "undefined") {
             dict[var_name] = [val];
             return true;
-        } else if (!Array.isArray(myVariable)) {
+        } else if (!Array.isArray(dict[var_name])) {
             var reason = `'${var_name}' is not an Array`;
             if (throw_maching_error) throw new MatchingError(path, reason);
             print_debug(`${path}: ${reason}`);
