@@ -894,7 +894,7 @@ test("reverse_pop_match with function", () => {
     expect(items).toEqual([item1]);
 });
 
-test("push)", () => {
+test("push", () => {
     var expected = {
         id: dm.push('ids'),
     };
@@ -924,12 +924,54 @@ test("push)", () => {
         received2,
         dict,
         !THROW_MATCHING_ERROR,
-        "root",
+        "root"
     );
 
     expect(res).toEqual("object matched");
 
     expect(dict).toEqual({ids: [10, 20]});
+});
+
+test("pop", () => {
+    var expected = {
+        id: dm.pop('ids'),
+    };
+
+    var received = {
+        name: 'john',
+        id: 20,
+    };
+
+    var dict = {}
+    expect(() => {
+        dm.partial_match(expected)(
+            received,
+            dict,
+            THROW_MATCHING_ERROR,
+            "root"
+        )
+    }).toThrow("'ids' is undefined")
+
+    dict = {ids: 'abc'}
+    expect(() => {
+        dm.partial_match(expected)(
+            received,
+            dict,
+            THROW_MATCHING_ERROR,
+            "root"
+        )
+    }).toThrow("'ids' is not an Array")
+
+    dict = {ids: [30,20,10]}
+    res = dm.partial_match(expected)(
+        received,
+        dict,
+        THROW_MATCHING_ERROR,
+        "root"
+    )
+
+    expect(res).toEqual("object matched")
+    expect(dict).toEqual({ids: [30, 10]})
 });
 
 

@@ -296,6 +296,43 @@ var push = (var_name, matcher) => {
     return f;
 };
 
+var pop = (var_name, matcher) => {
+    var f = (val, dict, throw_matching_error, path) => {
+        if (matcher) {
+            if (
+                !_match(matcher, val, dict, false, throw_matching_error, path)
+            ) {
+                return;
+            }
+        }
+
+        if (typeof dict[var_name] == "undefined") {
+            var reason = `'${var_name}' is undefined`;
+            if (throw_matching_error) throw new MatchingError(path, reason)
+            print_debug(`${path}: ${reason}`)
+            return false
+        } else if (!Array.isArray(dict[var_name])) {
+            var reason = `'${var_name}' is not an Array`;
+            if (throw_matching_error) throw new MatchingError(path, reason)
+            print_debug(`${path}: ${reason}`);
+            return false
+        } else {
+            const idx = dict[var_name].indexOf(val)
+            if (idx !== -1) {
+                dict[var_name].splice(idx, 1)
+                return true
+            } else {
+                var reason = `${val} not found in the array ${var_name}`
+                if (throw_matching_error) throw new MatchingError(path, reason)
+                print_debug(`${path}: ${reason}`)
+                return false
+            }
+        }
+    };
+    f.__name__ = `pop['${var_name}']`;
+    return f;
+};
+
 const absent = () => {
     return "I am the absent function";
 };
@@ -621,6 +658,7 @@ module.exports = {
 
     collect,
     push,
+    pop,
 
     partial_match,
     full_match,
