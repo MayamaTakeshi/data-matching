@@ -13,27 +13,36 @@ test("jsxpath", () => {
 </books>`;
 
     var parser = (s) => {
-        return JSON.parse(xml2json.toJson(s));
+        const res = JSON.parse(xml2json.toJson(s));
+        console.log("res:", JSON.stringify(res))
+        return res
     };
     var extractor = (data, key) => {
+        console.log("extractor", JSON.stringify(data), key)
         let jsxpath = new JSXPath(data);
-        return jsxpath.process({ path: key });
+        const res = jsxpath.process({ path: key });
+        console.log("res:", JSON.stringify(res))
+        return res
     };
 
     var gen_matcher = dm.gen_gen_matcher(parser, extractor, "jsxpath");
 
+    // obs: originally, parse of the xml would generate id as string (correct) but after doing "npm audit fix --force", we got xml2json downgraded from
+    // "^0.12.0" to "^0.7.1" and now they are parsed as number
+
     var matcher = gen_matcher({
         '/books/book[title = "Harry Potter"]': [
-            [{ id: "1111", code: dm.collect("code1") }],
+            [{ id: 1111, code: dm.collect("code1") }],
         ],
-        '/books/book[id = "2222"]': [
+        '/books/book[id = 2222]': [
             [{ title: "Catch-22", code: dm.collect("code2") }],
         ],
-        '/books/book[id = "3333"]': [[{ code: "foo@!{ending}" }]],
+        '/books/book[id = 3333]': [[{ code: "foo@!{ending}" }]],
     });
 
     var dict = {};
-    assert(matcher(xml, dict));
+    assert(matcher(xml, dict))
+    console.log(JSON.stringify(dict))
     assert(dict.code1 == "abc");
     assert(dict.code2 == "def");
     assert(dict.ending == "bar");
