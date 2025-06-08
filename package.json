@@ -1,10 +1,13 @@
 {
   "name": "data-matching",
-  "version": "1.39.0",
-  "description": "Matches a data object against a reference value Edit",
+  "version": "1.40.0",
+  "description": "Matches a data object against a reference value",
   "main": "src/index.js",
   "scripts": {
     "test": "node_modules/jest/bin/jest.js"
+  },
+  "engines": {
+    "node": "^17.9.1"
   },
   "repository": {
     "type": "git",
@@ -25,6 +28,7 @@
   "homepage": "https://github.com/MayamaTakeshi/data-matching#readme",
   "dependencies": {
     "braces": "^3.0.2",
+    "fast-xml-parser": "^5.2.4",
     "lodash": "^4.17.21",
     "set-value": "^4.0.1",
     "string-matching": "^1.13.0",

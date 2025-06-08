@@ -974,4 +974,64 @@ test("pop", () => {
     expect(dict).toEqual({ids: [30, 10]})
 });
 
+test("xml", () => {
+    var expected = [
+      {
+        "IVR": [
+          {
+            "Section": [
+              {
+                "Wait": [],
+                ":@": {
+                  "length": dm.collect("length")
+                }
+              },
+              {
+                "Play": [
+                  {
+                    "#text": "welcome.mp3"
+                  }
+                ]
+              },
+              {
+                "SendFax": [
+                  {
+                    "#text": "faxes/main_office_map.tiff"
+                  }
+                ],
+                ":@": {
+                  "header": "Your Invoice"
+                }
+              }
+            ],
+            ":@": {
+              "name": "main"
+            }
+          }
+        ]
+      }
+    ];
+
+    var received = `
+<IVR>
+  <Section name="main">
+    <Wait length="1"/>
+    <Play>welcome.mp3</Play>
+    <SendFax header="Your Invoice">faxes/main_office_map.tiff</SendFax>
+  </Section>
+</IVR>
+`
+    var dict = {}
+
+    res = dm.xml(expected)(
+        received,
+        dict,
+        !THROW_MATCHING_ERROR,
+        "root"
+    );
+
+    expect(res).toEqual("array matched");
+    expect(dict).toEqual({length: "1"});
+});
+
 

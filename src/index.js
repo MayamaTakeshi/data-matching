@@ -2,8 +2,10 @@ const _ = require("lodash");
 const sm = require("string-matching");
 const util = require("util");
 const MatchingError = sm.MatchingError;
+const { XMLParser } = require('fast-xml-parser');
 
 const re_string_matching_indication = /(^|[^!])!{/;
+
 
 var non_zero = (x, dict, throw_matching_error, path) => {
     if (typeof x != "number") {
@@ -418,6 +420,34 @@ var json = (expected, full_match) => {
     return f;
 };
 
+var xml = (expected, full_match) => {
+    var expected2 = matchify_strings(expected);
+    var f = (s, dict, throw_matching_error, path) => {
+        var parser = new XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: '',
+            preserveOrder: true,
+            //attributesGroupName: 'attrs', // cannot be use yet. See https://github.com/NaturalIntelligence/fast-xml-parser/issues/705
+            //trimValues: true,
+        })
+
+        var received = parser.parse(s);
+
+        return _match(
+            expected2,
+            received,
+            dict,
+            full_match,
+            throw_matching_error,
+            path,
+        );
+    };
+    f.__original_data__ = expected;
+    f.__name__ = "xml" + (full_match ? "_full_match" : "_partial_match");
+    return f;
+};
+
+
 var kv_str = (
     expected,
     param_sep,
@@ -714,6 +744,7 @@ module.exports = {
     fm: full_match,
 
     json,
+    xml,
 
     kv_str,
     m: matcher,
