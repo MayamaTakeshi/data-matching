@@ -752,11 +752,13 @@ test("pop_match with object and string collection", () => {
     const item1 = {
         id: 1,
         name: "user1",
+        surname: "bla-bla",
     };
 
     const item2 = {
         id: 2,
         name: "user2",
+        surname: "ble-ble",
     };
 
     const items = [item1, item2];
@@ -766,6 +768,7 @@ test("pop_match with object and string collection", () => {
     const item = dm.pop_match(
         {
             name: "user!{id}",
+            surname: "bla-!{_}",
         },
         items,
         dict,
