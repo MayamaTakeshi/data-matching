@@ -209,7 +209,7 @@ var _match = (
             );
         }
         if (expected != received) {
-            //console.log("throw_matching_error:", throw_matching_error)
+            //console.error("throw_matching_error:", throw_matching_error)
             reason = `expected='${expected}' received='${received}'`;
             if (throw_matching_error) throw new MatchingError(path, reason);
             print_debug(`${path}: ${reason}`);
@@ -575,11 +575,11 @@ var gen_gen_matcher = (parser, extractor, name) => {
     return (expected) => {
         var expected2 = matchify_strings(expected);
         var f = (s, dict, throw_matching_error, path) => {
-            console.log("s:", s);
+            console.error("s:", s);
             var received = parser(s);
-            console.log("received:", received);
+            console.error("received:", received);
             return _.every(expected2, (val, key) => {
-                console.log("key:", key);
+                console.error("key:", key);
                 var item = extractor(received, key);
                 if (val == absent && item) {
                     if (throw_matching_error) {
