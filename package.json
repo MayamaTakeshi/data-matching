@@ -31,7 +31,7 @@
     "fast-xml-parser": "^5.2.4",
     "lodash": "^4.17.21",
     "set-value": "^4.0.1",
-    "string-matching": "^1.15.2",
+    "string-matching": "^1.16.1",
     "tmpl": "^1.0.5"
   },
   "devDependencies": {

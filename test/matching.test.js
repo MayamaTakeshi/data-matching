@@ -241,12 +241,14 @@ test("partial_match: dicts matched", () => {
         a: 1,
         b: 2,
         c: ["zero", 1, true, dm._],
+        d: 'sip:!{user}@!{domain}',
     };
     var received = {
         a: 1,
         b: 2,
         c: ["zero", 1, true, 4],
-        d: "something extra",
+        d: 'sip:bob@biloxi.com',
+        e: "something extra",
     };
 
     var dict = {};
@@ -258,6 +260,8 @@ test("partial_match: dicts matched", () => {
     );
 
     expect(res).toEqual("object matched");
+    expect(dict.user).toEqual('bob');
+    expect(dict.domain).toEqual('biloxi.com');
 });
 
 test("partial_match: absent", () => {
