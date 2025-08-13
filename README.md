@@ -96,6 +96,18 @@ assert(store.user2 == 'bob')
 assert(store.domain2 == 'cba.com')
 assert(store.method == 'INVITE')
 ```
+## Using matching functions
+
+Suppose that you need to check if a value string in lower case matches a string.
+
+You can pass a function to perform the match like this:
+```
+var expected = {
+    some_param: (received, dict) => received.toLowerCase() == "abcdef",
+}
+```
+
+So the above will match some_param with any value like 'abcdef', 'ABCDEF', 'AbcDef', 'abcDEF' etc.
 
 ## More examples:
 

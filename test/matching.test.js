@@ -721,6 +721,28 @@ test("collect with matcher)", () => {
     expect(dict.main).toBe(received);
 });
 
+test("matching function", () => {
+    var expected = {
+        a: "aaa",
+        b: (received, dict) => received.toLowerCase() == "bbb",
+    };
+    var received = {
+        a: "aaa",
+        b: "BbB",
+    };
+
+    var dict = {};
+    var res;
+
+    res = dm.full_match(expected)(
+        received,
+        dict,
+        !THROW_MATCHING_ERROR,
+        "root",
+    );
+    expect(res).toEqual("object matched");
+});
+
 test("pop_match with object", () => {
     const item1 = {
         id: 1,
