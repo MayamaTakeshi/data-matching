@@ -106,14 +106,15 @@ var expected = {
     some_param: value => value.toLowerCase() == "abcdef",
 }
 ```
-and if you need to collect the value as it is, you can do:
+So the above will match some_param with any value like 'abcdef', 'ABCDEF', 'AbcDef', 'abcDEF' etc.
+
+And if you need to collect the value as it is, you can do:
 ```
 var expected = {
     some_param: dm.collect('some_param', value => value.toLowerCase() == "abcdef"),
 }
 ```
 
-So the above will match some_param with any value like 'abcdef', 'ABCDEF', 'AbcDef', 'abcDEF' etc.
 
 ## More examples:
 
