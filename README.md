@@ -103,7 +103,13 @@ Suppose that you need to check if a value string in lower case matches a string.
 You can pass a function to perform the match like this:
 ```
 var expected = {
-    some_param: (received, dict) => received.toLowerCase() == "abcdef",
+    some_param: value => value.toLowerCase() == "abcdef",
+}
+```
+and if you need to collect the value as it is, you can do:
+```
+var expected = {
+    some_param: dm.collect('some_param', value => value.toLowerCase() == "abcdef"),
 }
 ```
 
