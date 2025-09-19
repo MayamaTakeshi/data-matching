@@ -169,6 +169,41 @@ var _match_dicts = (
     return "object matched";
 };
 
+var collect = (var_name, matcher) => {
+    var f = (val, dict, throw_matching_error, path) => {
+        if (matcher) {
+            if (
+                !_match(matcher, val, dict, false, throw_matching_error, path)
+            ) {
+                return;
+            }
+        }
+
+        if (typeof dict[var_name] == "undefined") {
+            dict[var_name] = val;
+            print_debug(`${path}: collect OK`);
+            return true;
+        } else {
+            if (dict[var_name] != val) {
+                var reason = `cannot set '${var_name}' to '${util.inspect(
+                    val,
+                )}' because it is already set to '${util.inspect(
+                    dict[var_name],
+                )}'`;
+                if (throw_maching_error) throw new MatchingError(path, reason);
+                print_debug(`${path}: ${reason}`);
+                return false;
+            }
+            print_debug(
+                `${path}: collect OK (found already set to same value)`,
+            );
+            return true;
+        }
+    };
+    f.__name__ = `collect['${var_name}']`;
+    return f;
+};
+
 var _match = (
     expected,
     received,
@@ -208,6 +243,11 @@ var _match = (
                 path,
             );
         }
+
+        if(type_r == "function" && expected.__name__.startsWith('collect[')) {
+            return expected(received, dict, throw_matching_error, path) 
+        }
+
         if (expected != received) {
             //console.error("throw_matching_error:", throw_matching_error)
             reason = `expected='${expected}' received='${received}'`;
@@ -234,41 +274,6 @@ var _match = (
         )}) and received (${JSON.stringify(received)}) differ`;
         if (throw_matching_error) throw new MatchingError(path, reason);
     }
-};
-
-var collect = (var_name, matcher) => {
-    var f = (val, dict, throw_matching_error, path) => {
-        if (matcher) {
-            if (
-                !_match(matcher, val, dict, false, throw_matching_error, path)
-            ) {
-                return;
-            }
-        }
-
-        if (typeof dict[var_name] == "undefined") {
-            dict[var_name] = val;
-            print_debug(`${path}: collect OK`);
-            return true;
-        } else {
-            if (dict[var_name] != val) {
-                var reason = `cannot set '${var_name}' to '${util.inspect(
-                    val,
-                )}' because it is already set to '${util.inspect(
-                    dict[var_name],
-                )}'`;
-                if (throw_maching_error) throw new MatchingError(path, reason);
-                print_debug(`${path}: ${reason}`);
-                return false;
-            }
-            print_debug(
-                `${path}: collect OK (found already set to same value)`,
-            );
-            return true;
-        }
-    };
-    f.__name__ = `collect['${var_name}']`;
-    return f;
 };
 
 var push = (var_name, matcher) => {

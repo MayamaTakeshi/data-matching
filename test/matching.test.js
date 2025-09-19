@@ -721,6 +721,25 @@ test("collect with matcher)", () => {
     expect(dict.main).toBe(received);
 });
 
+test("collect function inside obj)", () => {
+    const sum = (x,y) => {
+        return x+y
+    }
+
+    var matcher = dm.partial_match({
+        sum: dm.collect("sumfu"),
+    })
+
+    var received = {
+        sum,
+    }
+
+    var dict = {};
+    expect(matcher(received, dict, !THROW_MATCHING_ERROR, "root")).toBeTruthy();
+    expect(dict.sumfu(1,2)).toBe(3);
+});
+
+
 test("matching function", () => {
     var expected = {
         a: "aaa",
