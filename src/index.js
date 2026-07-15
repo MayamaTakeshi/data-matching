@@ -190,7 +190,7 @@ var collect = (var_name, matcher) => {
                 )}' because it is already set to '${util.inspect(
                     dict[var_name],
                 )}'`;
-                if (throw_maching_error) throw new MatchingError(path, reason);
+                if (throw_matching_error) throw new MatchingError(path, reason);
                 print_debug(`${path}: ${reason}`);
                 return false;
             }
@@ -245,7 +245,7 @@ var _match = (
         }
 
         if(type_r == "function" && expected.__name__.startsWith('collect[')) {
-            return expected(received, dict, throw_matching_error, path) 
+            return expected(received, dict, throw_matching_error, path)
         }
 
         if (expected != received) {
@@ -291,7 +291,7 @@ var push = (var_name, matcher) => {
             return true;
         } else if (!Array.isArray(dict[var_name])) {
             var reason = `'${var_name}' is not an Array`;
-            if (throw_maching_error) throw new MatchingError(path, reason);
+            if (throw_matching_error) throw new MatchingError(path, reason);
             print_debug(`${path}: ${reason}`);
             return false;
         } else {
