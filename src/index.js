@@ -692,6 +692,8 @@ module.exports = {
     str_equal,
 
     collect,
+    $: collect,
+
     push,
     pop,
 

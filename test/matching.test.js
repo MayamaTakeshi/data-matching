@@ -370,7 +370,7 @@ test("any_of: first matcher", () => {
         dm.partial_match({
             aa: 10,
             bb: 20,
-            cc: dm.collect("cc"),
+            cc: dm.$("cc"),
         }),
     ]);
 
@@ -400,7 +400,7 @@ test("any_of: second matcher", () => {
         dm.partial_match({
             aa: 10,
             bb: 20,
-            cc: dm.collect("cc"),
+            cc: dm.$("cc"),
         }),
     ]);
 
