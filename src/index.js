@@ -753,6 +753,26 @@ module.exports = {
     json,
     xml,
 
+    string_list: (separator, decoder, expected) => {
+        var expected2 = matchify_strings(expected);
+        var f = (s, dict, throw_matching_error, path) => {
+            if (typeof s !== "string") {
+                if (throw_matching_error) {
+                    throw new MatchingError(path, `string_list expected a string but received ${typeof s}`);
+                }
+                return false;
+            }
+            var parts = s.split(separator);
+            if (decoder) {
+                parts = parts.map(decoder);
+            }
+            return _match(expected2, parts, dict, false, throw_matching_error, path);
+        };
+        f.__original_data__ = expected;
+        f.__name__ = "string_list";
+        return f;
+    },
+
     kv_str,
     m: matcher,
 
