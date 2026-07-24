@@ -1,6 +1,8 @@
 # data-matching
 Matches a data object against a match object.
 
+Written in TypeScript; ships its own type declarations (`dist/index.d.ts`), so no separate `@types/` package is needed. Source lives in `src/index.ts` and is compiled to `dist/` via `npm run build` (this also runs automatically before publishing).
+
 For the full API reference (all matchers and helper functions), see [DOC.md](https://github.com/MayamaTakeshi/data-matching/blob/master/DOC.md).
 
 # Syntax details

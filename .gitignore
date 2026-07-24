@@ -57,3 +57,6 @@ typings/
 # dotenv environment variables file
 .env
 
+# TypeScript build output (published from source at prepublish time)
+dist/
+
