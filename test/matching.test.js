@@ -527,6 +527,63 @@ test("any_of: no taint from previous matcher (array)", () => {
     expect(dict.cc).toBe(30);
 });
 
+test("kv_str", () => {
+    var matcher = dm.kv_str({
+            a: dm.$("a"),
+            b: dm.$("b"),
+            c: dm.$("c"),
+        },
+        "&",
+        "="
+    );
+
+    var dict = {};
+    expect(
+        matcher("a=1&b=2&c=C+C", dict, !THROW_MATCHING_ERROR, "root"),
+    ).toBeTruthy();
+    expect(dict.a).toBe("1");
+    expect(dict.b).toBe("2");
+    expect(dict.c).toBe("C+C");
+});
+
+test("www_form_urlencoded", () => {
+    var matcher = dm.www_form_urlencoded({
+        a: dm.$("a"),
+        b: dm.$("b"),
+        c: dm.$("c"),
+        "d e": dm.$("d"),
+    });
+
+    var dict = {};
+    expect(
+        matcher(
+            "a=1&b=hello+world&c=100%25&d%20e=foo%3Dbar",
+            dict,
+            !THROW_MATCHING_ERROR,
+            "root",
+        ),
+    ).toBeTruthy();
+    expect(dict.a).toBe("1");
+    expect(dict.b).toBe("hello world");
+    expect(dict.c).toBe("100%");
+    expect(dict.d).toBe("foo=bar");
+});
+
+test("www_form_urlencoded_full_match", () => {
+    var matcher = dm.www_form_urlencoded_full_match({
+        a: "1",
+        b: "2",
+    });
+
+    var dict = {};
+    expect(
+        matcher("a=1&b=2", dict, !THROW_MATCHING_ERROR, "root"),
+    ).toBeTruthy();
+    expect(
+        matcher("a=1&b=2&c=3", dict, !THROW_MATCHING_ERROR, "root"),
+    ).toBeFalsy();
+});
+
 test("unordered_list (dict elements): normal order", () => {
     var matcher = dm.unordered_list([
         dm.full_match({ a: 1, b: dm.collect("b"), c: 3 }),

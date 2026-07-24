@@ -1,13 +1,13 @@
 {
   "name": "data-matching",
-  "version": "1.49.0",
+  "version": "1.50.0",
   "description": "Matches a data object against a reference value",
   "main": "src/index.js",
   "scripts": {
     "test": "node_modules/jest/bin/jest.js"
   },
   "engines": {
-    "node": "^17.9.1"
+    "node": "^v17.9.1"
   },
   "repository": {
     "type": "git",
@@ -35,8 +35,6 @@
     "tmpl": "^1.0.5"
   },
   "devDependencies": {
-    "jest": "^27.4.3",
-    "jsxpath": "^1.0.0-alpha.5",
-    "xml2json": "^0.7.1"
+    "jest": "^27.4.3"
   }
 }

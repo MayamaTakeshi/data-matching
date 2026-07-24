@@ -494,6 +494,56 @@ var kv_str = (
     return f;
 };
 
+// Decodes a application/x-www-form-urlencoded component: '+' means space and
+// the rest follows the regular percent-encoding rules used by encodeURIComponent.
+var decode_www_form_urlencoded_component = (s) => {
+    return decodeURIComponent(s.replace(/\+/g, " "));
+};
+
+var www_form_urlencoded = (expected, postparse_decoder, full_match) => {
+    var expected2 = matchify_strings(expected);
+    var f = (s, dict, throw_matching_error, path) => {
+        if (typeof s !== "string") {
+            if (throw_matching_error) {
+                throw new MatchingError(
+                    path,
+                    `www_form_urlencoded expected a string but received ${typeof s}`,
+                );
+            }
+            return false;
+        }
+        var received = _.chain(s)
+            .split("&")
+            .filter((part) => part.length > 0)
+            .map((part) => {
+                var parts = part.split("=");
+                var key = decode_www_form_urlencoded_component(parts[0]);
+                var val = decode_www_form_urlencoded_component(
+                    parts.slice(1).join("="),
+                );
+                if (postparse_decoder) {
+                    val = postparse_decoder(val);
+                }
+                return [key, val];
+            })
+            .fromPairs()
+            .value();
+        return _match(
+            expected2,
+            received,
+            dict,
+            full_match,
+            throw_matching_error,
+            path,
+        );
+    };
+    f.__original_data__ = expected;
+    f.__name__ =
+        "www_form_urlencoded" + (full_match ? "_full_match" : "_partial_match");
+    return f;
+};
+
+
 var matcher = (name, expected) => {
     if (!typeof expected == "function") throw new Error("Must be a function");
     var f = (received, dict, throw_matching_error, path) => {
@@ -740,6 +790,16 @@ module.exports = {
             true,
         );
     },
+
+    www_form_urlencoded_partial_match: (expected, postparse_decoder) => {
+        return www_form_urlencoded(expected, postparse_decoder, false);
+    },
+
+    www_form_urlencoded_full_match: (expected, postparse_decoder) => {
+        return www_form_urlencoded(expected, postparse_decoder, true);
+    },
+
+    www_form_urlencoded,
 
     any_of,
 

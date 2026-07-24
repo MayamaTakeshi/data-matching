@@ -1,9 +1,8 @@
 const dm = require("../src/index");
 const assert = require("assert");
 
-test("jsxpath", () => {
-    const xml2json = require("xml2json");
-    const JSXPath = require("jsxpath");
+test("xpath-like selector (fast-xml-parser)", () => {
+    const { XMLParser } = require("fast-xml-parser");
 
     var xml = `
 <books>
@@ -13,31 +12,45 @@ test("jsxpath", () => {
 </books>`;
 
     var parser = (s) => {
-        const res = JSON.parse(xml2json.toJson(s));
-        console.log("res:", JSON.stringify(res))
-        return res
+        const xmlParser = new XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: "",
+        });
+        const res = xmlParser.parse(s);
+        console.log("res:", JSON.stringify(res));
+        return res;
     };
+
+    // Minimal xpath-like extractor supporting queries of the form:
+    // /books/book[attr = "value"] or /books/book[attr = value]
     var extractor = (data, key) => {
-        console.log("extractor", JSON.stringify(data), key)
-        let jsxpath = new JSXPath(data);
-        const res = jsxpath.process({ path: key });
-        console.log("res:", JSON.stringify(res))
-        return res
+        console.log("extractor", JSON.stringify(data), key);
+        var m = key.match(/^\/books\/book\[(\w+)\s*=\s*"?([^"\]]+)"?\]$/);
+        if (!m) {
+            return undefined;
+        }
+        var [, attr, rawValue] = m;
+        var books = [].concat(data.books.book);
+        var res = books.find((book) => {
+            var value = book[attr];
+            return value == rawValue;
+        });
+        console.log("res:", JSON.stringify(res));
+        return res;
     };
 
-    var gen_matcher = dm.gen_gen_matcher(parser, extractor, "jsxpath");
-
-    // obs: originally, parse of the xml would generate id as string (correct) but after doing "npm audit fix --force", we got xml2json downgraded from
-    // "^0.12.0" to "^0.7.1" and now they are parsed as number
+    var gen_matcher = dm.gen_gen_matcher(parser, extractor, "xpath-like");
 
     var matcher = gen_matcher({
-        '/books/book[title = "Harry Potter"]': [
-            [{ id: 1111, code: dm.collect("code1") }],
-        ],
-        '/books/book[id = 2222]': [
-            [{ title: "Catch-22", code: dm.collect("code2") }],
-        ],
-        '/books/book[id = 3333]': [[{ code: "foo@!{ending}" }]],
+        '/books/book[title = "Harry Potter"]': {
+            id: "1111",
+            code: dm.collect("code1"),
+        },
+        '/books/book[id = 2222]': {
+            title: "Catch-22",
+            code: dm.collect("code2"),
+        },
+        '/books/book[id = 3333]': { code: "foo@!{ending}" },
     });
 
     var dict = {};

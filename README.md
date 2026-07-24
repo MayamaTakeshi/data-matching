@@ -1,6 +1,8 @@
 # data-matching
 Matches a data object against a match object.
 
+For the full API reference (all matchers and helper functions), see [DOC.md](https://github.com/MayamaTakeshi/data-matching/blob/master/DOC.md).
+
 # Syntax details
   - Part of strings can be collected using '!{name}' syntax (see https://github.com/MayamaTakeshi/string-matching)
   - data can be collected (stored in a dictionary passed to matching function) by using dm.collect('name')
